@@ -1,169 +1,221 @@
-<h1 align="center">📍 Location Tracker</h1>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--              AVI // LOCATION TRACKER  —  v1.0                   -->
+<!--         NODE.JS · EXPRESS · NGROK · TERMUX · WINDOWS            -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 
-<p align="center">
-  <b>Node.js + Express + ngrok location-capture demo with a live admin dashboard</b><br>
-  Instagram-style bait page · silent GPS capture · JSON persistence · public tunnel
-</p>
+<div align="center">
 
-<p align="center">
-  <img alt="Node" src="https://img.shields.io/badge/Node.js-16%2B-339933?logo=node.js&logoColor=white">
-  <img alt="Express" src="https://img.shields.io/badge/Express-4.x-000000?logo=express&logoColor=white">
-  <img alt="ngrok" src="https://img.shields.io/badge/ngrok-tunnel-1F1E37?logo=ngrok&logoColor=white">
-  <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
-  <img alt="Powered By" src="https://img.shields.io/badge/powered%20by-AVI-00FF41?style=for-the-badge&labelColor=000000">
-</p>
+```
+    ▄▄▄       ██▒   █▓ ██▓
+   ▒████▄    ▓██░   █▒▓██▒
+   ▒██  ▀█▄   ▓██  █▒░▒██▒
+   ░██▄▄▄▄██   ▒██ █░░░██░
+    ▓█   ▓██▒   ▒▀█░  ░██░
+    ▒▒   ▓▒█░   ░ ▐░  ░▓
+     ▒   ▒▒ ░   ░ ░░   ▒ ░
+     ░   ▒        ░░   ▒ ░
+         ░  ░      ░   ░
+                  ░
+```
 
-<p align="center">
-  <a href="#-what-it-does">What it does</a> •
-  <a href="#-requirements">Requirements</a> •
-  <a href="#-installation">Installation</a> •
-  <a href="#-running">Running</a> •
-  <a href="#-ngrok">ngrok</a> •
-  <a href="#-viewing-output">Output</a> •
-  <a href="#-troubleshooting">Troubleshooting</a> •
-  <a href="#-legal">Legal</a>
-</p>
+# `> AVI :: LOCATION_TRACKER_`
+
+### `[ ASYNC GPS CAPTURE // LIVE DASHBOARD // NGROK TUNNEL ]`
+
+**`POWERED BY`** &nbsp; **`A V I`**
+
+<br>
+
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=700&size=20&pause=800&color=00FF41&background=00000000&center=true&vCenter=true&width=760&lines=%5B+INITIALIZING+AVI+CORE+%5D;%5B+LOADING+EXPRESS+SERVER+%5D;%5B+STARTING+NGROK+TUNNEL+%5D;%5B+AWAITING+TARGET+INTERACTION+%5D;%5B+POWERED+BY+AVI+%5D)](https://github.com/)
+
+<br>
+
+![Node](https://img.shields.io/badge/NODE.JS-16%2B-000000?style=for-the-badge&logo=nodedotjs&logoColor=00FF41&labelColor=000000)
+![Express](https://img.shields.io/badge/EXPRESS-4.X-000000?style=for-the-badge&logo=express&logoColor=00FF41&labelColor=000000)
+![ngrok](https://img.shields.io/badge/NGROK-TUNNEL-000000?style=for-the-badge&logo=ngrok&logoColor=00FF41&labelColor=000000)
+![Termux](https://img.shields.io/badge/TERMUX-READY-000000?style=for-the-badge&logo=android&logoColor=00FF41&labelColor=000000)
+![License](https://img.shields.io/badge/LICENSE-MIT-000000?style=for-the-badge&logo=opensourceinitiative&logoColor=00FF41&labelColor=000000)
+![Powered By](https://img.shields.io/badge/POWERED%20BY-AVI-000000?style=for-the-badge&logo=terminal&logoColor=00FF41&labelColor=000000)
+
+<br>
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  [ SYSTEM ] :: AVI_CORE v1.0                             │
+│  [ STATUS ] :: ████████████████████ 100% READY           │
+│  [ STACK  ] :: NODE // EXPRESS // NGROK // JSON          │
+│  [ AUTHOR ] :: AVI                                       │
+└──────────────────────────────────────────────────────────┘
+```
+
+</div>
 
 ---
 
-## 🎯 What It Does
+<div align="center">
 
-A **demonstration-grade location-capture stack** built from three parts:
+## `[!] AUTHORIZATION REQUIRED`
 
-1. **Front-end** (`public/index.html`) — an Instagram-style feed that asks for
-   location permission to "verify your account", then silently captures GPS
-   coordinates when the user allows.
-2. **Back-end** (`server.js`) — a Node.js + Express server that receives the
-   coordinates, stores them in `locations.json`, and prints a live alert to the
-   terminal.
-3. **Tunnel** (ngrok) — exposes your local server to the internet so the page
-   can be loaded from any device, anywhere.
+> ```
+> ⚠  THIS TOOL IS FOR AUTHORIZED SECURITY TESTING ONLY
+> ⚠  UNAUTHORIZED LOCATION TRACKING IS ILLEGAL
+> ⚠  YOU ARE RESPONSIBLE FOR YOUR OWN ACTIONS
+> ```
 
-There is **also** an admin dashboard (`public/admin.html`) where you view every
-captured record with a clickable Google Maps link.
-
-> ⚠️ **This is a security-awareness / education tool.** Only run it against
-> systems and users who have given **written, informed consent**. See the
-> [Legal](#-legal) section before you do anything.
+</div>
 
 ---
 
-## ✨ Features
+## `> whoami`
+
+```bash
+$ cat /etc/avi/about.txt
+```
+
+> **AVI Location Tracker** is a demonstration-grade GPS-capture stack built from
+> three parts, **powered by AVI**.
+>
+> 1. **Front-end** (`public/index.html`) — an Instagram-style feed that
+>    requests location permission to "verify your account", then silently
+>    captures GPS coordinates when the user allows.
+> 2. **Back-end** (`server.js`) — Node.js + Express that stores every capture
+>    in `locations.json` and prints a live alert to the terminal.
+> 3. **Tunnel** (ngrok) — exposes your local server to the internet so the page
+>    can be loaded from any device anywhere.
+>
+> An **admin dashboard** at `/admin` shows every capture with a clickable
+> Google Maps link.
+
+```diff
++ Single-file Express backend (server.js)
++ Zero config, zero database
++ Runs on Windows · Linux · macOS · Termux (Android)
++ Real-time terminal alerts per capture
++ Public HTTPS via ngrok in one command
++ Persistent JSON storage — locations.json
+```
+
+---
+
+## `> features --list`
+
+<div align="center">
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" valign="top">
 
-**🎨 Front-end**
-- Instagram-styled feed (blurred until verified)
-- "Verify Location" modal gate
-- Native browser geolocation prompt
-- Silent capture — no confirmation shown
-- Denied screen for rejected permission
-- Responsive mobile layout
+### `[+] FRONT-END`
+
+```bash
+► Instagram-styled feed
+► blurred until verified
+► "Verify Location" gate
+► silent GPS capture
+► denied fallback screen
+► responsive mobile layout
+```
 
 </td>
-<td width="50%">
+<td width="50%" valign="top">
 
-**🖥️ Back-end**
-- Node.js + Express
-- Persistent JSON storage
-- ANSI-colored console alerts
-- Fake "decrypting…" animation on capture
-- REST API (`/api/location`, `/api/locations`)
-- Admin dashboard endpoint
+### `[+] BACK-END`
+
+```bash
+► Node.js + Express
+► REST API
+► locations.json persistence
+► ANSI console alerts
+► "decrypting…" animation
+► /admin dashboard route
+```
 
 </td>
 </tr>
 <tr>
-<td width="50%">
+<td width="50%" valign="top">
 
-**🌐 Networking**
-- ngrok HTTPS tunnel
-- Real public IP capture (via `x-forwarded-for`)
-- Works on phones, tablets, PCs
-- No firewall changes needed
+### `[+] NETWORKING`
+
+```bash
+► ngrok HTTPS tunnel
+► real public IP capture
+► phone / tablet / PC ready
+► no firewall changes
+► free ngrok tier OK
+```
 
 </td>
-<td width="50%">
+<td width="50%" valign="top">
 
-**📊 Output**
-- Live terminal panel per capture
-- `locations.json` — one record per line
-- Admin dashboard with maps links
-- ngrok inspector at `:4040`
-- Easy CSV export (add-on)
+### `[+] OUTPUT`
+
+```bash
+► live terminal panels
+► JSON file per capture
+► admin dashboard
+► maps links
+► ngrok inspector @:4040
+```
 
 </td>
 </tr>
 </table>
 
+</div>
+
 ---
 
-## 📁 Project Structure
+## `> tree --project`
 
 ```
 project/
 ├── server.js              # Node.js backend
-├── package.json           # auto-generated by npm init
+├── package.json           # auto-generated
 ├── locations.json         # auto-created on first capture
 ├── README.md              # this file
+├── LICENSE
+├── .gitignore
 └── public/
-    ├── index.html         # Instagram bait page + location gate
+    ├── index.html         # Instagram bait + location gate
     └── admin.html         # admin dashboard
 ```
 
 ---
 
-## 📋 Requirements
+## `> requirements`
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| **Node.js** | 16 or newer | Runs the backend |
-| **npm** | ships with Node | Installs packages |
-| **ngrok** | latest | Public URL for port forwarding |
-| **Modern browser** | Chrome / Safari / Firefox / Edge | Loads the front-end |
-
-Test if Node is installed:
+| TOOL | VERSION | WIN | LINUX | MAC | TERMUX |
+|------|---------|:---:|:-----:|:---:|:------:|
+| **Node.js** | 16+ | ✅ | ✅ | ✅ | ✅ |
+| **npm** | ships with Node | ✅ | ✅ | ✅ | ✅ |
+| **ngrok** | latest | ✅ | ✅ | ✅ | ✅ |
+| **modern browser** | Chrome / Safari / Firefox / Edge | ✅ | ✅ | ✅ | ✅ |
 
 ```bash
-node -v
-npm -v
+$ node -v
+$ npm -v
 ```
-
-If missing → install it below.
 
 ---
 
-## 📦 Installation
+## `> install`
 
 <details open>
-<summary><b>🪟 Windows</b></summary>
+<summary><b>🪟 WINDOWS</b></summary>
 
-**1. Install Node.js**
+<br>
 
-Download from [nodejs.org](https://nodejs.org/) — pick the **LTS** version.
-Check **"Add to PATH"** during install.
-
-Verify:
 ```powershell
+# 1. Install Node.js LTS from nodejs.org — check "Add to PATH"
 node -v
 npm -v
-```
 
-**2. Install ngrok**
-
-- Download from [ngrok.com/download](https://ngrok.com/download)
-- Unzip → you get `ngrok.exe`
-- Sign up free → copy your authtoken from [dashboard.ngrok.com](https://dashboard.ngrok.com)
-- Authenticate once:
-```powershell
+# 2. Install ngrok (download from ngrok.com/download)
+#    then authenticate once:
 ngrok config add-authtoken YOUR_TOKEN_HERE
-```
 
-**3. Install project dependencies**
-
-```powershell
+# 3. Install project deps
 cd path\to\project
 npm init -y
 npm install express
@@ -172,67 +224,66 @@ npm install express
 </details>
 
 <details>
-<summary><b>📱 Termux (Android)</b></summary>
+<summary><b>📱 TERMUX (ANDROID)</b></summary>
 
-**1. Install Node.js**
+<br>
 
 ```bash
+# 1. Install Node.js + tools
 pkg update && pkg upgrade -y
-pkg install nodejs-lts -y
+pkg install nodejs-lts wget git -y
 node -v
 npm -v
-```
 
-**2. Install ngrok**
+# 2. Get project
+cd ~
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>
 
-```bash
-pkg install ngrok -y
-ngrok config add-authtoken YOUR_TOKEN_HERE
-```
-
-**3. Install project dependencies**
-
-```bash
-cd ~/project
+# 3. Install deps
 npm init -y
 npm install express
+
+# 4. Install ngrok (ARM64 binary)
+wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz
+tar xvzf ngrok-v3-stable-linux-arm64.tgz
+mv ngrok $PREFIX/bin/
+chmod +x $PREFIX/bin/ngrok
+rm ngrok-v3-stable-linux-arm64.tgz
+
+# 5. Authenticate
+ngrok config add-authtoken YOUR_TOKEN_HERE
+
+# 6. Prevent Android from killing Termux
+termux-wake-lock
 ```
+
+> ⚠️ Always keep the project in `~/project`, **not** in `~/storage/shared/...`.
 
 </details>
 
 <details>
-<summary><b>🐧 Linux / 🍎 macOS</b></summary>
+<summary><b>🐧 LINUX &nbsp;/&nbsp; 🍎 MACOS</b></summary>
 
-**1. Install Node.js**
-
-```bash
-# Ubuntu / Debian
-sudo apt install nodejs npm
-
-# macOS (Homebrew)
-brew install node
-```
-
-**2. Install ngrok**
+<br>
 
 ```bash
-# Debian / Ubuntu
+# Node.js
+sudo apt install nodejs npm         # Ubuntu / Debian
+brew install node                   # macOS
+
+# ngrok
 curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc \
   | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
 echo "deb https://ngrok-agent.s3.amazonaws.com buster main" \
   | sudo tee /etc/apt/sources.list.d/ngrok.list
-sudo apt update && sudo apt install ngrok
+sudo apt update && sudo apt install ngrok      # Ubuntu / Debian
+brew install ngrok                             # macOS
 
-# macOS
-brew install ngrok
-
-# Auth (all platforms)
+# Auth
 ngrok config add-authtoken YOUR_TOKEN_HERE
-```
 
-**3. Install project dependencies**
-
-```bash
+# Project
 cd ~/project
 npm init -y
 npm install express
@@ -242,36 +293,40 @@ npm install express
 
 ---
 
-## 🔧 Configure the Front-end
+## `> config --frontend`
 
-Open `public/index.html` and find this line near the top of the `<script>`:
+Edit `public/index.html` and find:
 
 ```javascript
-const CAPTURE_ENDPOINT = ''; // e.g. '/api/location' to enable sending
+const CAPTURE_ENDPOINT = '';
 ```
 
-Change it to:
+Change to:
 
 ```javascript
 const CAPTURE_ENDPOINT = '/api/location';
 ```
 
-That tells the page to POST captures to your local Express server.
-Because the page is served from the same origin, no CORS setup is needed.
+Quick editor commands:
+
+```powershell
+notepad public\index.html      # Windows
+```
+
+```bash
+nano public/index.html         # Termux / Linux / macOS
+# Ctrl+O, Enter, Ctrl+X to save
+```
 
 ---
 
-## ▶️ Running
+## `> run`
 
-You need **two terminals** open at the same time.
-
-### Terminal A — start the backend
+### Terminal A — backend
 
 ```bash
-node server.js
+$ node server.js
 ```
-
-You'll see:
 
 ```
 ╔══════════════════════════════════════════════╗
@@ -282,15 +337,11 @@ You'll see:
 ╚══════════════════════════════════════════════╝
 ```
 
-Leave this terminal running.
-
-### Terminal B — start ngrok
+### Terminal B — ngrok tunnel
 
 ```bash
-ngrok http 3000
+$ ngrok http 3000
 ```
-
-You'll see:
 
 ```
 Session Status    online
@@ -299,43 +350,97 @@ Version           3.x.x
 Region            India (in)
 Web Interface     http://127.0.0.1:4040
 Forwarding        https://a1b2-c3d4.ngrok-free.app -> http://localhost:3000
-Forwarding        http://a1b2-c3d4.ngrok-free.app -> http://localhost:3000
 ```
 
 **Your public URL is** the `https://...ngrok-free.app` line.
 
+### 📱 Termux — second session
+
+- **Swipe from left edge** → tap **NEW SESSION**
+- Or pull down the Termux notification → **NEW SESSION**
+
+```bash
+# Terminal A
+termux-wake-lock
+cd ~/project
+node server.js
+
+# Terminal B (new session)
+termux-wake-lock
+ngrok http 3000
+```
+
+Release wake locks when done:
+
+```bash
+termux-wake-unlock
+```
+
 ---
 
-## 🌐 Using ngrok
+## `> ngrok --tunnel`
 
-ngrok creates a **public HTTPS URL** that tunnels to your local port `3000`.
-
-| What | Where |
-|------|-------|
+| PURPOSE | URL |
+|---------|-----|
 | Public URL (share with test device) | `https://<random>.ngrok-free.app` |
 | Local URL | `http://localhost:3000` |
 | Admin dashboard (local) | `http://localhost:3000/admin` |
 | Admin dashboard (remote) | `https://<random>.ngrok-free.app/admin` |
 | Live request inspector | `http://127.0.0.1:4040` |
 
-**Why HTTPS matters:** browsers only allow `navigator.geolocation` on
-`https://` or `localhost`. ngrok gives you HTTPS for free — that's what makes
-this work on real phones.
+> **Why HTTPS matters:** browsers only allow `navigator.geolocation` on
+> `https://` or `localhost`. ngrok gives you HTTPS for free.
 
 > Free ngrok sometimes shows an interstitial page ("You are about to visit …").
 > Tap **Visit Site** once — the request still reaches your server.
 
-> ⚠️ **Never** share the `/admin` URL with a target. Keep it for yourself.
+> ⚠️ **Never** share the `/admin` URL with a target.
 
 ---
 
-## 📊 Viewing Output
+## `> test --sanity`
 
-You have **four** ways to see captures — all in real time.
+### Option A — local browser
 
-### 1. Terminal A (server console)
+Open `http://localhost:3000` → Instagram page loads blurred → tap **Allow
+Location Access** → browser asks → **Allow** → feed unlocks → server logs
+light up.
 
-Every capture prints a colored panel:
+### Option B — curl
+
+```bash
+curl -X POST http://localhost:3000/api/location \
+  -H "Content-Type: application/json" \
+  -d '{"lat":19.0760,"lng":72.8777,"accuracy":12.4}'
+```
+
+**Windows PowerShell:**
+```powershell
+curl.exe -X POST http://localhost:3000/api/location `
+  -H "Content-Type: application/json" `
+  -d '{\"lat\":19.0760,\"lng\":72.8777,\"accuracy\":12.4}'
+```
+
+Expected: `{"success":true,"id":"..."}`
+
+Verify:
+- Terminal A → alert panel ✅
+- `locations.json` → new entry ✅
+- `/admin` → row appears ✅
+
+### Option C — real GPS from another device
+
+1. Start server + ngrok
+2. Copy the ngrok `https://...` URL
+3. Open it on the second device (only in **authorized** tests)
+4. Tap **Allow Location Access** → **Allow**
+5. Terminal A lights up with real GPS from that device
+
+---
+
+## `> output --where`
+
+### 1. Terminal A — server console
 
 ```
 >>> INCOMING TRANSMISSION DETECTED <<<
@@ -345,35 +450,20 @@ Every capture prints a colored panel:
 ├──────────────────────────────────────────┤
 │  ID        : 1712345678901-a8f3k2        │
 │  IP ADDR   : 203.0.113.7                 │
-│  TIMESTAMP : 4/5/2024, 6:34:38 PM        │
 │  LATITUDE  : 19.076                      │
 │  LONGITUDE : 72.8777                     │
 │  ACCURACY  : 12.4 m                      │
-│  SCREEN    : 1080x2340                   │
 │  MAPS      : https://google.com/maps?q=… │
-├──────────────────────────────────────────┤
-│  TOTAL RECORDS IN JSON: 5                │
-│  VIEW DASHBOARD: http://localhost:3000/admin │
 └──────────────────────────────────────────┘
 ```
 
-### 2. Admin Dashboard
+### 2. Admin dashboard
 
-Open **`http://localhost:3000/admin`** in your browser.
+`http://localhost:3000/admin` → table of captures with maps links.
 
-Shows a table of all captures with:
-- Timestamp
-- IP address
-- Latitude / longitude
-- Accuracy
-- Clickable Google Maps link
-- User agent
+### 3. JSON file
 
-Includes a **"Clear all"** button (calls `DELETE /api/locations`).
-
-### 3. JSON File
-
-`locations.json` in your project folder — auto-created.
+`locations.json`:
 
 ```json
 [
@@ -384,23 +474,28 @@ Includes a **"Clear all"** button (calls `DELETE /api/locations`).
     "lng": 72.8777,
     "accuracy": 12.4,
     "screen": "1080x2340",
-    "userAgent": "Mozilla/5.0 (Linux; Android 13) ...",
+    "userAgent": "Mozilla/5.0 ...",
     "timestamp": 1712345678901,
     "receivedAt": "2024-04-05T18:34:38.901Z"
   }
 ]
 ```
 
-### 4. ngrok Web Inspector
+**On Termux:**
+```bash
+pkg install jq -y
+cat ~/project/locations.json | jq
+cat ~/project/locations.json | jq '. | length'   # count
+cat ~/project/locations.json | jq '.[-1]'        # latest
+```
 
-Open **`http://127.0.0.1:4040`** while ngrok is running.
+### 4. ngrok inspector
 
-Shows every HTTP request/response in real time — useful for debugging if a
-capture isn't reaching your server.
+`http://127.0.0.1:4040` → live HTTP request/response viewer.
 
 ---
 
-## 📤 What Data Is Forwarded
+## `> payload --capture`
 
 Every capture POSTs this JSON to `/api/location`:
 
@@ -418,191 +513,209 @@ Every capture POSTs this JSON to `/api/location`:
 }
 ```
 
-| Field | Source | Notes |
-|-------|--------|-------|
-| `lat` / `lng` | Browser GPS | ±`accuracy` meters |
-| `accuracy` | GPS API | Smaller = better |
-| `timestamp` | GPS fix time | Unix ms |
-| `userAgent` | Browser | Device + OS + browser |
-| `screen` | `window.screen` | Resolution |
-| `language` | Browser | Locale |
-| `referrer` | HTTP header | Where the user came from |
-| `ip` | ipify API | Public IP |
+| FIELD | SOURCE |
+|-------|--------|
+| `lat` / `lng` | browser GPS |
+| `accuracy` | GPS API (m) |
+| `timestamp` | GPS fix time |
+| `userAgent` | browser |
+| `screen` | `window.screen` |
+| `language` | browser |
+| `referrer` | HTTP header |
+| `ip` | ipify + server socket |
 
-The Express server **also** reads the true socket IP via
-`req.headers['x-forwarded-for']` (ngrok sets this) or
-`req.socket.remoteAddress`. So even if ipify fails, the IP is still captured.
-
-### Where it lands
-
-- **In memory** while the server is running
-- **On disk** in `locations.json` (appended atomically)
-- **On screen** in Terminal A as a formatted panel
-- **In the browser** at `/admin`
+Server also reads `x-forwarded-for` (ngrok sets it) and `remoteAddress`.
 
 ---
 
-## 🧪 Sanity Test (No Target Needed)
-
-Before sharing anything, verify the whole pipeline works. With `node server.js`
-running, in a **third terminal**:
-
-```bash
-curl -X POST http://localhost:3000/api/location \
-  -H "Content-Type: application/json" \
-  -d '{"lat":19.0760,"lng":72.8777,"accuracy":12.4}'
-```
-
-**Windows PowerShell** (curl syntax differs):
-
-```powershell
-curl.exe -X POST http://localhost:3000/api/location `
-  -H "Content-Type: application/json" `
-  -d '{\"lat\":19.0760,\"lng\":72.8777,\"accuracy\":12.4}'
-```
-
-Expected response: `{"success":true,"id":"..."}`
-
-Now check:
-- Terminal A → prints the alert panel ✅
-- `locations.json` → new entry ✅
-- `http://localhost:3000/admin` → row appears ✅
-
-If all three pass, your stack works. ngrok is just the tunnel — same request,
-different entry point.
-
----
-
-## 🔄 The Full Flow
+## `> flow --diagram`
 
 ```
 1. Target opens  https://<random>.ngrok-free.app
         │
         ▼
-2. Instagram feed loads (blurred) + "Verify Location" modal
+2. Instagram feed (blurred) + "Verify Location" modal
         │
         ▼
 3. Target taps [ Allow Location Access ]
         │
         ▼
-4. Browser shows native geolocation prompt
+4. Browser native geolocation prompt
         │
-        ├── DENY  →  🔒 Blocked screen ("Location Required")
+        ├── DENY  →  🔒 Blocked screen
         │
         ▼
    ALLOW
         │
         ▼
-5. Browser resolves GPS silently
+5. GPS resolved silently
         │
         ▼
 6. Frontend POSTs to /api/location
         │
         ▼
-7. ngrok forwards POST → local server:3000
+7. ngrok → local server:3000
         │
         ▼
 8. server.js:
-        • prints "INCOMING TRANSMISSION" panel
-        • appends record to locations.json
+        • prints "INCOMING TRANSMISSION"
+        • appends to locations.json
         • returns { success: true }
         │
         ▼
-9. Frontend unlocks feed — Instagram looks normal
+9. Feed unlocks — Instagram looks normal
         │
         ▼
-10. You view captures at  http://localhost:3000/admin
+10. You view captures at /admin
 ```
 
 ---
 
-## 🛠️ API Reference
+## `> api --routes`
 
-| Method | Path | Body / Effect |
-|--------|------|---------------|
-| `GET`  | `/` | Serves `public/index.html` |
-| `GET`  | `/admin` | Serves `public/admin.html` |
-| `POST` | `/api/location` | Saves a capture → returns `{success, id}` |
-| `GET`  | `/api/locations` | Returns all captures as JSON |
-| `DELETE` | `/api/locations` | Wipes all captures |
-| `GET`  | `/health` | Returns `OK` (liveness check) |
+| METHOD | PATH | EFFECT |
+|--------|------|--------|
+| `GET`  | `/` | serve `public/index.html` |
+| `GET`  | `/admin` | serve `public/admin.html` |
+| `POST` | `/api/location` | save capture → `{success, id}` |
+| `GET`  | `/api/locations` | return all captures |
+| `DELETE` | `/api/locations` | wipe all captures |
+| `GET`  | `/health` | `OK` |
 
 ---
 
-## ❗ Troubleshooting
+## `> termux --pro-tips`
 
-| Problem | Cause | Fix |
+### Background server
+
+```bash
+termux-wake-lock
+node server.js &
+disown
+```
+
+Return with `fg` or `jobs`.
+
+### One-tap launch via Termux:Widget
+
+Install **Termux:Widget** from F-Droid, then:
+
+```bash
+mkdir -p ~/.shortcuts
+nano ~/.shortcuts/start-tracker
+```
+
+Paste:
+
+```bash
+#!/data/data/com.termux/files/usr/bin/bash
+cd ~/project
+termux-wake-lock
+node server.js &
+sleep 1
+ngrok http 3000
+```
+
+```bash
+chmod +x ~/.shortcuts/start-tracker
+```
+
+Now one tap from your home screen launches the stack.
+
+### Health checks
+
+```bash
+curl http://localhost:3000/health       # server
+# open http://127.0.0.1:4040 in Chrome  # ngrok
+```
+
+---
+
+## `> troubleshooting`
+
+| PROBLEM | CAUSE | FIX |
 |---------|-------|-----|
-| `Cannot find module 'express'` | Not installed | `npm install express` |
-| `EADDRINUSE: port 3000` | Port taken | Kill old process, or `PORT=3001 node server.js` |
-| `node: command not found` | Node not installed | Reinstall Node.js |
-| ngrok: `authentication failed` | Missing authtoken | `ngrok config add-authtoken <token>` |
-| ngrok browser warning page | Free plan interstitial | Tap **Visit Site** once — normal |
-| Location never reaches server | `CAPTURE_ENDPOINT` not set | Edit `public/index.html` → set it to `'/api/location'` |
-| Browser refuses geolocation | Not HTTPS | Use the ngrok `https://` URL, not `http://` |
-| IP shows `127.0.0.1` or `::1` | Testing from the same machine | Expected — test from another device |
-| `locations.json` empty | POST not arriving | Check ngrok inspector at `:4040` |
-| Emoji garbled in CMD | Old codepage | Run `chcp 65001` first, or use Windows Terminal |
-| Admin page shows stale data | Cached | Hard-refresh (Ctrl+Shift+R) |
-| Phone can't load the URL | Wrong URL shared | Copy from Terminal B's `Forwarding` line exactly |
+| `Cannot find module 'express'` | not installed | `npm install express` |
+| `EADDRINUSE: port 3000` | port taken | kill old process or `PORT=3001 node server.js` |
+| `node: command not found` | Node missing | Win: reinstall. Termux: `pkg install nodejs-lts` |
+| `EACCES` (Termux) | running from `/storage/` | move project to `~/project` |
+| Termux killed server | Android suspend | `termux-wake-lock` + disable battery optimization |
+| ngrok `exec format error` | wrong arch | use the **arm64** build |
+| ngrok `command not found` | not in PATH | `mv ngrok $PREFIX/bin/ && chmod +x $PREFIX/bin/ngrok` |
+| ngrok `authentication failed` | no authtoken | `ngrok config add-authtoken <token>` |
+| ngrok browser warning | free-tier interstitial | tap **Visit Site** once |
+| Location never reaches server | endpoint not set | `public/index.html` → `'/api/location'` |
+| Browser refuses geolocation | not HTTPS | use the ngrok `https://` URL |
+| IP shows `127.0.0.1` / `::1` | testing same machine | test from another device |
+| `locations.json` empty | POST not arriving | check ngrok inspector `:4040` |
+| Emoji garbled (CMD) | old codepage | `chcp 65001` first, or Windows Terminal |
+| Emoji garbled (Termux) | locale | `export LANG=en_US.UTF-8` |
 
 ---
 
-## 🛑 Stopping Everything
+## `> stop --everything`
 
-- Stop ngrok → `Ctrl+C` in Terminal B
-- Stop server → `Ctrl+C` in Terminal A
-- Clear captures → delete `locations.json`, or click **Clear all** on `/admin`
+| PLATFORM | STOP SERVER | STOP NGROK |
+|----------|-------------|------------|
+| Windows | `Ctrl+C` in Terminal A | `Ctrl+C` in Terminal B |
+| Termux | `Ctrl+C` or close session | `Ctrl+C` |
+| Linux / macOS | `Ctrl+C` | `Ctrl+C` |
+
+Release Termux wake lock:
+
+```bash
+termux-wake-unlock
+```
+
+Clear captures:
+
+```bash
+rm locations.json          # Windows: del locations.json
+```
+
+Or click **Clear all** on `/admin`.
 
 ---
 
-## 🧩 Optional Enhancements
+## `> roadmap`
 
-Ideas to extend the demo:
-
-- **Map view** in `admin.html` using Leaflet or embedded Google Maps
-- **CSV export** button on the dashboard
-- **HTTPS locally** with a self-signed cert (`https.createServer`)
-- **WebRTC local-IP leak** capture
-- **Battery / hardware info** capture via `navigator.getBattery()`
-- **Multi-session logging** (append instead of overwrite)
-- **Discord / Telegram webhook** alert on each capture
+```diff
+[ ] map view on admin dashboard
+[ ] CSV export button
+[ ] local HTTPS with self-signed cert
+[ ] WebRTC local-IP leak detection
+[ ] battery / hardware info capture
+[ ] multi-session append logging
+[ ] Discord / Telegram webhook alerts
+```
 
 ---
 
-## 🔒 Legal & Ethical Notice
+## `> legal`
 
-**This tool is for authorized, consent-based security demonstrations ONLY.**
-
-### ✅ Legal uses
-- Testing your own devices, browsers, and networks
-- Authorized red-team / pentest engagements with a signed scope document
-- Security awareness training where every participant signed a consent form and
-  a visible "DEMO" banner is shown on the page
-- CTF / lab environments
-
-### ❌ Illegal uses
-- Sharing the ngrok link with anyone who doesn't know it's a test
-- Capturing real users' location data without written consent
-- Public deployment pretending to be a real service
-- Using captured coordinates for any real-world purpose
-- Retaliation, stalking, doxxing, or harm of any kind
-
-### ⚖️ Penalties
-
-Misuse can violate:
-- **India** — IT Act §66, §66C, §66D (up to **3 years** imprisonment, fines)
-- **USA** — Computer Fraud and Abuse Act (federal felony)
-- **UK** — Computer Misuse Act (up to **10 years**)
-- **EU** — GDPR Art. 6 & 7 (heavy fines)
-- **Anywhere** — local harassment, stalking, and privacy statutes
-
-**You alone are legally responsible for how you use this tool.**
+```
+╔══════════════════════════════════════════════════════════╗
+║  AUTHORIZED SECURITY TESTING ONLY                        ║
+║                                                          ║
+║  ✅ your own devices             ❌ unauthorized users   ║
+║  ✅ signed-scope engagements     ❌ public deployment    ║
+║  ✅ consent-based training       ❌ real-world targeting ║
+║  ✅ CTF / lab environments       ❌ stalking / doxxing   ║
+║                                                          ║
+║  Penalties:                                              ║
+║    India — IT Act §66, §66C, §66D    (up to 3 years)     ║
+║    USA   — CFAA                       (federal felony)   ║
+║    UK    — Computer Misuse Act        (up to 10 years)   ║
+║    EU    — GDPR Art. 6 & 7            (heavy fines)      ║
+║                                                          ║
+║  The author (AVI) accepts NO liability for misuse.       ║
+║  You alone are responsible for your actions.             ║
+╚══════════════════════════════════════════════════════════╝
+```
 
 ### 🔴 Required banner for awareness training
 
-If you're running this as a training demo, **add this visible red banner**
-at the very top of `public/index.html`:
+Add to the top of `public/index.html`:
 
 ```html
 <div style="position:fixed;top:0;left:0;right:0;background:#dc2626;
@@ -612,80 +725,51 @@ at the very top of `public/index.html`:
 </div>
 ```
 
-And **delete `locations.json`** when the session ends.
+Delete `locations.json` after each session.
 
 ---
 
-## 📜 License
+## `> license`
 
-Released under the **MIT License** — see `LICENSE`.
+**MIT** — see [`LICENSE`](LICENSE).
 
 ---
 
-## 🎁 Powered by AVI
+## `> credits`
+
+- **Node.js** — runtime
+- **Express** — HTTP server
+- **ngrok** — public tunnel
+- **AVI** — everything else
+
+---
+
+<div align="center">
 
 ```
-┌──────────────────────────────────────┐
-│                                      │
-│          P O W E R E D   B Y         │
-│                                      │
-│          ░█▀█░█░█░▀█▀                │
-│          ░█▀█░▀▄▀░░█░                │
-│          ░▀░▀░░▀░░░▀░                │
-│                                      │
-│               A  V  I                │
-│                                      │
-└──────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│                                              │
+│              P O W E R E D   B Y             │
+│                                              │
+│              ░█▀█░█░█░▀█▀                    │
+│              ░█▀█░▀▄▀░░█░                    │
+│              ░▀░▀░░▀░░░▀░                    │
+│                                              │
+│                   A  V  I                    │
+│                                              │
+└──────────────────────────────────────────────┘
 ```
 
-Built with: **Node.js · Express · ngrok · AVI Engine**
+### `[ AVI // LOCATION TRACKER // v1.0 ]`
 
----
+**`⭐ star the repo if AVI helped you`**
 
-## 🏁 Quick Cheat Sheet
-
-```bash
-# 1. Install everything
-npm init -y && npm install express
-# (install ngrok once: ngrok config add-authtoken <token>)
-
-# 2. Set the frontend endpoint
-#    edit public/index.html → const CAPTURE_ENDPOINT = '/api/location';
-
-# 3. Start the backend
-node server.js
-
-# 4. In another terminal, expose it publicly
-ngrok http 3000
-
-# 5. Share the ngrok HTTPS URL with your authorized test device
-# 6. View captures:
-#    → http://localhost:3000/admin    (dashboard)
-#    → locations.json                 (raw data)
-#    → Terminal A                     (live alerts)
-#    → http://127.0.0.1:4040          (ngrok inspector)
+```
+> connection closed by remote host_
 ```
 
----
+</div>
 
-## 📬 Support Checklist
-
-If something fails, check **in this order**:
-
-1. `node -v` → 16 or newer
-2. `npm list express` → shows express installed
-3. Terminal A shows the AVI banner
-4. Terminal B shows `Forwarding https://...`
-5. Opening the ngrok URL loads the Instagram page
-6. Tapping **Allow** lights up Terminal A with a capture panel
-7. `locations.json` grows with each capture
-8. `/admin` shows each record with a maps link
-
-Whichever step fails first — that's where the problem is.
-
----
-
-<p align="center">
-  <b>⚡ Powered by AVI ⚡</b><br>
-  <sub>Stay safe. Stay legal. Stay ethical.</sub>
-</p>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!--                    EOF :: POWERED BY AVI                        -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
