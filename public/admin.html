@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ADMIN://GEO-INTERCEPT</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+        min-height: 100vh;
+        background: #020502;
+        color: #0f0;
+        font-family: 'Courier New', monospace;
+        overflow-x: hidden;
+    }
+
+    /* ============================================================ */
+    /*  BACKGROUND LAYERS                                            */
+    /* ============================================================ */
+
+    /* Matrix rain canvas */
+    #matrix {
+        position: fixed; inset: 0;
+        z-index: 0;
+        opacity: 0.22;
+        pointer-events: none;
+    }
+
+    /* CRT scanlines */
+    body::after {
+        content: ""; position: fixed; inset: 0;
+        background: repeating-linear-gradient(0deg,
+            rgba(0,255,0,0.035) 0px,
+            rgba(0,255,0,0.035) 1px,
+            transparent 1px,
+            transparent 3px);
+        pointer-events: none;
+        z-index: 9990;
+        mix-blend-mode: overlay;
+    }
+
+    /* Vignette + subtle flicker */
+    body::before {
+        content: ""; position: fixed; inset: 0;
+        background:
+            radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.85) 100%);
+        pointer-events: none;
+        z-index: 9989;
+        animation: crtFlicker 5s infinite;
+    }
+    @keyframes crtFlicker {
+        0%, 95%, 100% { opacity: 1; }
+        96%           { opacity: 0.85; }
+        97%           { opacity: 0.95; }
+    }
+
+    /* ============================================================ */
+    /*  ALERT / MODAL (unchanged behavior)                           */
+    /* ============================================================ */
+    #alertOverlay {
+        position: fixed; inset: 0; z-index: 10000;
+        display: none; align-items: center; justify-content: center;
+        background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);
+    }
+    #alertOverlay.show { display: flex; }
+
+    .alert-card {
+        position: relative;
+        padding: 36px 44px 28px;
+        background: #001a00;
+        border: 2px solid #0f0;
+        text-align: center;
+        min-width: 320px; max-width: 90vw;
+        box-shadow: 0 0 20px #0f0, 0 0 60px rgba(0,255,0,0.5), inset 0 0 40px rgba(0,255,0,0.15);
+        animation: cardPop 0.35s cubic-bezier(0.34,1.56,0.64,1),
+                   cardGlow 1.4s ease-in-out infinite;
+    }
+    @keyframes cardPop { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes cardGlow {
+        0%,100% { box-shadow: 0 0 20px #0f0, 0 0 60px rgba(0,255,0,0.5), inset 0 0 40px rgba(0,255,0,0.15); }
+        50%     { box-shadow: 0 0 35px #0f0, 0 0 100px rgba(0,255,0,0.85), inset 0 0 60px rgba(0,255,0,0.3); }
+    }
+    .alert-icon { font-size: 3.5rem; color: #0f0; filter: drop-shadow(0 0 20px #0f0); animation: iconPulse 0.8s ease-in-out infinite; }
+    @keyframes iconPulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: 0.7; } }
+    .alert-title {
+        margin: 16px 0 6px; font-size: 1.4rem; font-weight: 900;
+        letter-spacing: 5px; color: #0f0;
+        text-shadow: 0 0 8px #0f0, 0 0 20px #0f0, 0 0 40px #0f0;
+        animation: blink 0.7s steps(2) infinite;
+    }
+    .alert-sub { font-size: 0.75rem; letter-spacing: 4px; color: #0a0; margin-bottom: 20px; }
+    .alert-details {
+        background: rgba(0,255,0,0.05);
+        border: 1px solid #0a0;
+        padding: 12px 16px; text-align: left;
+        font-size: 0.78rem; line-height: 1.8; margin-bottom: 20px;
+    }
+    .alert-details .row { display: flex; justify-content: space-between; gap: 14px; }
+    .alert-details .lbl { color: #0a0; letter-spacing: 2px; }
+    .alert-details .val { color: #7fff7f; font-weight: bold; text-shadow: 0 0 6px #0f0; word-break: break-all; text-align: right; }
+    .alert-close {
+        background: transparent; color: #0f0; border: 2px solid #0f0;
+        padding: 9px 28px; font-family: inherit; font-size: 0.8rem;
+        font-weight: bold; letter-spacing: 3px; cursor: pointer;
+        text-shadow: 0 0 6px #0f0; transition: all 0.15s;
+    }
+    .alert-close:hover { background: #0f0; color: #000; text-shadow: none; box-shadow: 0 0 25px #0f0; }
+
+    /* ============================================================ */
+    /*  USER DETAIL POPUP                                            */
+    /* ============================================================ */
+    #userModal {
+        position: fixed; inset: 0; z-index: 10001;
+        display: none; align-items: center; justify-content: center;
+        background: rgba(0,0,0,0.92); backdrop-filter: blur(6px);
+        padding: 16px;
+    }
+    #userModal.show { display: flex; }
+
+    .modal-box {
+        position: relative;
+        width: 100%; max-width: 1100px;
+        max-height: 92vh;
+        background: linear-gradient(145deg, #041a04 0%, #001200 100%);
+        border: 1px solid #0f0;
+        box-shadow: 0 0 30px rgba(0,255,0,0.4), 0 0 80px rgba(0,255,0,0.2), inset 0 0 60px rgba(0,255,0,0.05);
+        display: flex; flex-direction: column;
+        animation: modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        overflow: hidden;
+    }
+    @keyframes modalIn {
+        0%   { transform: scale(0.9) translateY(30px); opacity: 0; }
+        100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .modal-box::before, .modal-box::after {
+        content: ""; position: absolute; width: 30px; height: 30px;
+        border: 2px solid #0f0; pointer-events: none; z-index: 5;
+        box-shadow: 0 0 12px #0f0;
+    }
+    .modal-box::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .modal-box::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    .modal-header {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 14px 22px; border-bottom: 1px solid #0a0; background: rgba(0,255,0,0.04);
+    }
+    .modal-header h2 {
+        font-size: 0.95rem; letter-spacing: 3px; color: #7fff7f;
+        text-shadow: 0 0 8px #0f0;
+        display: flex; align-items: center; gap: 10px;
+    }
+    .modal-header h2 .dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #0f0; box-shadow: 0 0 10px #0f0;
+        animation: iconPulse 1.4s ease-in-out infinite;
+    }
+    .modal-close {
+        background: transparent; color: #0f0; border: 1px solid #0f0;
+        width: 30px; height: 30px; font-family: inherit; font-size: 1rem;
+        cursor: pointer; transition: all 0.15s;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { background: #0f0; color: #000; box-shadow: 0 0 15px #0f0; }
+
+    .modal-body {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+        overflow: hidden; flex: 1; min-height: 0;
+    }
+    @media (max-width: 860px) {
+        .modal-body { grid-template-columns: 1fr; overflow-y: auto; }
+    }
+
+    .modal-left {
+        padding: 22px; border-right: 1px solid #0a0;
+        display: flex; flex-direction: column; gap: 18px;
+        overflow-y: auto;
+    }
+    @media (max-width: 860px) { .modal-left { border-right: none; border-bottom: 1px solid #0a0; } }
+
+    /* Globe */
+    .globe-wrap { position: relative; width: 240px; height: 240px; margin: 6px auto 0; perspective: 900px; }
+    .globe {
+        position: absolute; inset: 0; border-radius: 50%;
+        background:
+            radial-gradient(circle at 30% 30%, rgba(0,255,0,0.35), transparent 55%),
+            radial-gradient(circle at 70% 70%, rgba(0,150,0,0.25), transparent 60%),
+            repeating-linear-gradient(0deg, rgba(0,255,0,0.08) 0px, rgba(0,255,0,0.08) 1px, transparent 1px, transparent 14px),
+            repeating-linear-gradient(90deg, rgba(0,255,0,0.08) 0px, rgba(0,255,0,0.08) 1px, transparent 1px, transparent 14px),
+            radial-gradient(circle at 50% 50%, #003300 0%, #000800 75%);
+        border: 1px solid #0f0;
+        box-shadow: 0 0 30px rgba(0,255,0,0.6), inset 0 0 60px rgba(0,255,0,0.35), inset -30px -30px 60px rgba(0,0,0,0.7);
+        animation: globeSpin 12s linear infinite;
+        overflow: hidden;
+    }
+    @keyframes globeSpin {
+        from { background-position: 0 0, 0 0, 0 0, 0 0, 0 0; }
+        to   { background-position: 0 0, 0 0, 0 0, -280px 0, 0 0; }
+    }
+    .globe::before {
+        content: ""; position: absolute; inset: 0; border-radius: 50%;
+        background-image:
+            radial-gradient(ellipse 28% 14% at 32% 40%, rgba(0,255,0,0.55), transparent 70%),
+            radial-gradient(ellipse 18% 24% at 58% 55%, rgba(0,255,0,0.45), transparent 70%),
+            radial-gradient(ellipse 22% 10% at 72% 34%, rgba(0,255,0,0.5), transparent 70%),
+            radial-gradient(ellipse 12% 16% at 22% 68%, rgba(0,255,0,0.4), transparent 70%);
+        filter: blur(1px);
+        animation: globeSpin 12s linear infinite;
+    }
+    .globe::after {
+        content: ""; position: absolute; inset: -6px; border-radius: 50%;
+        background: radial-gradient(circle, transparent 62%, rgba(0,255,0,0.3) 75%, transparent 82%);
+        pointer-events: none; animation: iconPulse 3s ease-in-out infinite;
+    }
+    .orbit {
+        position: absolute; inset: -18px; border-radius: 50%;
+        border: 1px dashed rgba(0,255,0,0.35);
+        animation: orbitSpin 8s linear infinite;
+    }
+    .orbit::before {
+        content: ""; position: absolute; top: 50%; left: -3px;
+        width: 6px; height: 6px; border-radius: 50%;
+        background: #0f0; box-shadow: 0 0 10px #0f0;
+    }
+    @keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .globe-label { text-align: center; font-size: 0.68rem; letter-spacing: 3px; color: #0a0; margin-top: 10px; }
+    .globe-label b { color: #7fff7f; }
+
+    .map-section h3 { font-size: 0.72rem; letter-spacing: 3px; color: #0a0; margin-bottom: 8px; text-transform: uppercase; }
+    .map-frame {
+        position: relative; width: 100%; aspect-ratio: 1 / 1;
+        border: 1px solid #0a0; background: #000;
+        box-shadow: inset 0 0 20px rgba(0,255,0,0.15);
+        overflow: hidden;
+    }
+    .map-frame iframe { width: 100%; height: 100%; border: 0; filter: hue-rotate(70deg) saturate(1.2) brightness(0.9); }
+    .map-frame::after {
+        content: ""; position: absolute; inset: 0;
+        background:
+            linear-gradient(to right, transparent 49.6%, rgba(0,255,0,0.5) 50%, transparent 50.4%),
+            linear-gradient(to bottom, transparent 49.6%, rgba(0,255,0,0.5) 50%, transparent 50.4%);
+        pointer-events: none;
+    }
+    .map-frame::before {
+        content: ""; position: absolute; top: 50%; left: 50%;
+        width: 22px; height: 22px; transform: translate(-50%, -50%);
+        border: 2px solid #0f0; border-radius: 50%;
+        box-shadow: 0 0 15px #0f0, inset 0 0 8px #0f0;
+        pointer-events: none; animation: iconPulse 1.5s ease-in-out infinite; z-index: 2;
+    }
+    .map-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .map-actions a {
+        flex: 1; min-width: 130px; text-align: center; text-decoration: none;
+        color: #0f0; border: 1px solid #0f0; padding: 8px 12px;
+        font-size: 0.72rem; letter-spacing: 2px; transition: all 0.15s;
+        text-shadow: 0 0 5px #0f0;
+    }
+    .map-actions a:hover { background: #0f0; color: #000; text-shadow: none; box-shadow: 0 0 15px #0f0; }
+
+    .modal-right { padding: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+    .modal-right h3 {
+        font-size: 0.72rem; letter-spacing: 3px; color: #0a0;
+        text-transform: uppercase; border-bottom: 1px solid #0a0; padding-bottom: 6px;
+    }
+    .data-grid { display: flex; flex-direction: column; gap: 10px; }
+    .data-row {
+        display: grid; grid-template-columns: 130px 1fr; gap: 12px;
+        align-items: start; padding: 10px 12px;
+        background: rgba(0,255,0,0.04); border-left: 2px solid #0a0;
+        font-size: 0.82rem; transition: all 0.15s;
+    }
+    .data-row:hover {
+        background: rgba(0,255,0,0.09); border-left-color: #0f0;
+        box-shadow: inset 0 0 20px rgba(0,255,0,0.1);
+    }
+    .data-key { color: #0a0; letter-spacing: 1.5px; text-transform: uppercase; font-size: 0.7rem; padding-top: 2px; }
+    .data-val { color: #7fff7f; font-weight: bold; text-shadow: 0 0 5px rgba(0,255,0,0.6); word-break: break-all; line-height: 1.5; }
+    .data-val.mono { font-family: 'Courier New', monospace; }
+    .data-val.coord { color: #ff0; text-shadow: 0 0 6px #ff0; font-size: 0.95rem; letter-spacing: 0.5px; }
+    .data-val.ip { color: #f0f; text-shadow: 0 0 6px #f0f; }
+    .data-val.id { color: #0ff; text-shadow: 0 0 6px #0ff; font-size: 0.75rem; }
+
+    .copy-btn {
+        background: transparent; color: #0f0; border: 1px solid #0a0;
+        padding: 2px 8px; font-family: inherit; font-size: 0.65rem;
+        letter-spacing: 1px; cursor: pointer; margin-left: 8px;
+        transition: all 0.15s; vertical-align: middle;
+    }
+    .copy-btn:hover { background: #0f0; color: #000; border-color: #0f0; }
+    .copy-btn.copied { background: #0f0; color: #000; }
+
+    .modal-footer {
+        padding: 12px 22px; border-top: 1px solid #0a0;
+        background: rgba(0,255,0,0.03);
+        display: flex; justify-content: space-between; align-items: center;
+        gap: 12px; flex-wrap: wrap;
+        font-size: 0.7rem; color: #0a0; letter-spacing: 1.5px;
+    }
+
+    /* ============================================================ */
+    /*  DASHBOARD                                                    */
+    /* ============================================================ */
+    .container {
+        max-width: 1500px; margin: 0 auto; padding: 24px 22px 60px;
+        position: relative; z-index: 10;
+    }
+
+    /* Top status bar */
+    .top-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 16px; margin-bottom: 18px;
+        background: rgba(0,20,0,0.75);
+        border: 1px solid #0a0;
+        box-shadow: 0 0 20px rgba(0,255,0,0.15), inset 0 0 20px rgba(0,255,0,0.05);
+        font-size: 0.72rem; letter-spacing: 2px;
+        color: #0a0;
+        backdrop-filter: blur(6px);
+    }
+    .top-bar .left { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .top-bar .right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .top-bar .pulse-dot {
+        display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+        background: #0f0; box-shadow: 0 0 8px #0f0;
+        animation: iconPulse 1.2s ease-in-out infinite;
+        margin-right: 6px;
+    }
+    .top-bar b { color: #7fff7f; text-shadow: 0 0 6px #0f0; }
+
+    /* Main header */
+    header {
+        display: flex; justify-content: space-between; align-items: center;
+        border: 1px solid #0a0;
+        padding: 16px 20px; margin-bottom: 20px;
+        background: rgba(0,20,0,0.55);
+        box-shadow: 0 0 25px rgba(0,255,0,0.15), inset 0 0 25px rgba(0,255,0,0.05);
+        flex-wrap: wrap; gap: 14px;
+        position: relative;
+        overflow: hidden;
+    }
+    /* Animated scanline across header */
+    header::after {
+        content: ""; position: absolute; top: 0; left: -40%;
+        width: 40%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0,255,0,0.15), transparent);
+        animation: headerScan 4s linear infinite;
+        pointer-events: none;
+    }
+    @keyframes headerScan {
+        from { left: -40%; }
+        to   { left: 140%; }
+    }
+
+    h1 {
+        font-size: 1.15rem; letter-spacing: 4px;
+        text-shadow: 0 0 8px #0f0, 0 0 20px rgba(0,255,0,0.5);
+        display: flex; align-items: center; gap: 10px;
+        flex-wrap: wrap;
+    }
+    h1 .tag {
+        color: #0a0; font-size: 0.65rem; letter-spacing: 2px;
+        border: 1px solid #0a0; padding: 2px 8px;
+        text-shadow: none;
+    }
+    h1 span {
+        display: block; color: #0a0; font-size: 0.7rem;
+        letter-spacing: 1px; margin-top: 4px; text-shadow: none;
+    }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+        background: transparent; color: #0f0; border: 1px solid #0f0;
+        padding: 8px 14px; font-family: inherit; font-size: 0.75rem;
+        cursor: pointer; letter-spacing: 1.5px;
+        text-shadow: 0 0 5px #0f0; transition: all 0.15s;
+        position: relative;
+    }
+    .btn::before {
+        content: ""; position: absolute; inset: 0;
+        background: rgba(0,255,0,0);
+        transition: background 0.2s;
+        pointer-events: none;
+    }
+    .btn:hover { background: #0f0; color: #000; text-shadow: none; box-shadow: 0 0 15px #0f0; }
+    .btn.active { background: #0f0; color: #000; text-shadow: none; }
+
+    /* ============================================================ */
+    /*  HUD PANEL: radar + stats + hex stream                        */
+    /* ============================================================ */
+    .hud-row {
+        display: grid;
+        grid-template-columns: 220px 1fr 320px;
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    @media (max-width: 1100px) {
+        .hud-row { grid-template-columns: 1fr 1fr; }
+        .hud-hex { grid-column: 1 / -1; }
+    }
+    @media (max-width: 720px) {
+        .hud-row { grid-template-columns: 1fr; }
+    }
+
+    .hud-cell {
+        border: 1px solid #0a0;
+        background: rgba(0,20,0,0.5);
+        padding: 14px;
+        box-shadow: 0 0 20px rgba(0,255,0,0.1), inset 0 0 20px rgba(0,255,0,0.04);
+        position: relative;
+        overflow: hidden;
+    }
+    .hud-cell::before,
+    .hud-cell::after {
+        content: ""; position: absolute; width: 14px; height: 14px;
+        border: 1px solid #0f0; pointer-events: none;
+        opacity: 0.7;
+    }
+    .hud-cell::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .hud-cell::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    .hud-title {
+        font-size: 0.65rem;
+        letter-spacing: 3px;
+        color: #0a0;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .hud-title::before {
+        content: "▸";
+        color: #0f0;
+    }
+
+    /* Radar */
+    .radar-wrap {
+        display: flex; flex-direction: column; align-items: center;
+        gap: 6px;
+    }
+    .radar {
+        width: 150px; height: 150px;
+        border-radius: 50%;
+        border: 1px solid #0f0;
+        position: relative;
+        background:
+            radial-gradient(circle, rgba(0,255,0,0.05) 0%, transparent 70%);
+        box-shadow: 0 0 20px rgba(0,255,0,0.4), inset 0 0 30px rgba(0,255,0,0.15);
+        overflow: hidden;
+    }
+    /* concentric rings */
+    .radar::before,
+    .radar::after {
+        content: ""; position: absolute; top: 50%; left: 50%;
+        border-radius: 50%; border: 1px solid rgba(0,255,0,0.25);
+        transform: translate(-50%, -50%);
+    }
+    .radar::before { width: 66%; height: 66%; }
+    .radar::after  { width: 33%; height: 33%; }
+
+    .radar-sweep {
+        position: absolute; inset: 0;
+        border-radius: 50%;
+        background: conic-gradient(from 0deg, transparent 0%, transparent 70%, rgba(0,255,0,0.6) 100%);
+        animation: radarSpin 2.2s linear infinite;
+    }
+    @keyframes radarSpin { to { transform: rotate(360deg); } }
+
+    /* crosshair lines */
+    .radar-cross-h, .radar-cross-v {
+        position: absolute; background: rgba(0,255,0,0.25);
+    }
+    .radar-cross-h { top: 50%; left: 0; right: 0; height: 1px; }
+    .radar-cross-v { left: 50%; top: 0; bottom: 0; width: 1px; }
+
+    /* blips */
+    .radar-blip {
+        position: absolute; width: 5px; height: 5px; border-radius: 50%;
+        background: #0f0;
+        box-shadow: 0 0 8px #0f0;
+        animation: blipFade 2.2s linear infinite;
+    }
+    @keyframes blipFade {
+        0%, 80% { opacity: 0.9; }
+        100%    { opacity: 0; }
+    }
+    .radar-label {
+        font-size: 0.6rem; letter-spacing: 2px; color: #0a0;
+    }
+
+    /* Stats mini grid */
+    .mini-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+    }
+    .mini-stat {
+        padding: 10px 12px;
+        background: rgba(0,255,0,0.04);
+        border-left: 2px solid #0a0;
+    }
+    .mini-stat .lbl {
+        font-size: 0.6rem; color: #0a0;
+        letter-spacing: 2px; text-transform: uppercase;
+    }
+    .mini-stat .val {
+        font-size: 1.35rem;
+        color: #7fff7f;
+        text-shadow: 0 0 8px #0f0;
+        margin-top: 2px;
+    }
+    .mini-stat .val.small { font-size: 0.9rem; }
+
+    /* Hex stream */
+    .hex-stream {
+        font-size: 0.62rem;
+        line-height: 1.45;
+        color: #0a0;
+        height: 170px;
+        overflow: hidden;
+        position: relative;
+        font-family: 'Courier New', monospace;
+        letter-spacing: 0.5px;
+        word-break: break-all;
+    }
+    .hex-stream::after {
+        content: "";
+        position: absolute; left: 0; right: 0; bottom: 0;
+        height: 40px;
+        background: linear-gradient(to bottom, transparent, rgba(0,20,0,0.95));
+        pointer-events: none;
+    }
+    .hex-stream b { color: #0f0; text-shadow: 0 0 4px #0f0; }
+
+    /* ============================================================ */
+    /*  TABLE                                                        */
+    /* ============================================================ */
+    .table-wrap {
+        border: 1px solid #0a0;
+        overflow: hidden;
+        background: rgba(0,20,0,0.55);
+        box-shadow: 0 0 25px rgba(0,255,0,0.12), inset 0 0 25px rgba(0,255,0,0.04);
+        position: relative;
+    }
+    .table-wrap::before,
+    .table-wrap::after {
+        content: ""; position: absolute; width: 18px; height: 18px;
+        border: 2px solid #0f0; pointer-events: none; z-index: 3;
+        box-shadow: 0 0 10px #0f0;
+    }
+    .table-wrap::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .table-wrap::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; min-width: 900px; }
+    th, td {
+        text-align: left; padding: 12px;
+        border-bottom: 1px solid rgba(0,255,0,0.15);
+        vertical-align: top;
+    }
+    th {
+        background: rgba(0,255,0,0.08); color: #7fff7f;
+        font-size: 0.66rem; letter-spacing: 2px; text-transform: uppercase;
+        position: sticky; top: 0; z-index: 2;
+        border-bottom: 1px solid #0f0;
+    }
+    tbody tr {
+        cursor: pointer;
+        transition: background 0.15s;
+        border-left: 2px solid transparent;
+    }
+    tbody tr:hover {
+        background: rgba(0,255,0,0.08);
+        border-left-color: #0f0;
+    }
+    tbody tr:hover td:first-child {
+        color: #0f0;
+        text-shadow: 0 0 8px #0f0;
+    }
+    td.lat, td.lng { color: #7fff7f; font-weight: bold; }
+    td.ip { color: #0a0; }
+    td.time { color: #0a0; white-space: nowrap; }
+    a.map-link {
+        color: #0f0; text-decoration: none;
+        border-bottom: 1px dashed #0f0;
+    }
+    a.map-link:hover { text-shadow: 0 0 6px #0f0; }
+
+    .empty {
+        padding: 50px 20px; text-align: center;
+        color: #0a0; line-height: 1.8;
+    }
+    .empty .big { font-size: 2.5rem; display: block; margin-bottom: 10px; }
+    .blink { animation: blink 1s steps(2) infinite; }
+    @keyframes blink { 50% { opacity: 0.3; } }
+
+    .new-row { animation: rowFlash 2s ease-out; }
+    @keyframes rowFlash {
+        0%   { background: rgba(0,255,0,0.5); }
+        100% { background: transparent; }
+    }
+
+    /* Bottom terminal bar */
+    .terminal-bar {
+        position: fixed; bottom: 0; left: 0; right: 0;
+        padding: 8px 20px;
+        background: rgba(0,15,0,0.9);
+        border-top: 1px solid #0a0;
+        font-size: 0.7rem; color: #0a0; letter-spacing: 1.5px;
+        display: flex; justify-content: space-between;
+        z-index: 11;
+        backdrop-filter: blur(6px);
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.7);
+    }
+    .terminal-bar .blink { color: #0f0; }
+    .terminal-bar b { color: #7fff7f; text-shadow: 0 0 6px #0f0; }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #0a0; border: 1px solid #0f0; }
+    ::-webkit-scrollbar-thumb:hover { background: #0f0; }
+</style>
+</head>
+<body>
+
+<!-- Matrix rain canvas -->
+<canvas id="matrix"></canvas>
+
+<!-- ============================================== -->
+<!--  NEW LOCATION ALERT                            -->
+<!-- ============================================== -->
+<div id="alertOverlay">
+    <div class="alert-card">
+        <div class="alert-icon">⚠</div>
+        <div class="alert-title">NEW LOCATION</div>
+        <div class="alert-sub">▸ TRACKED ◂</div>
+        <div class="alert-details">
+            <div class="row"><span class="lbl">LAT</span><span class="val" id="alertLat">—</span></div>
+            <div class="row"><span class="lbl">LNG</span><span class="val" id="alertLng">—</span></div>
+            <div class="row"><span class="lbl">IP</span><span class="val" id="alertIp">—</span></div>
+            <div class="row"><span class="lbl">TIME</span><span class="val" id="alertTime">—</span></div>
+        </div>
+        <button class="alert-close" id="alertClose">[ OK ]</button>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!--  USER DETAIL POPUP                             -->
+<!-- ============================================== -->
+<div id="userModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2><span class="dot"></span> TARGET PROFILE · GEO-INTERCEPT</h2>
+            <button class="modal-close" id="userModalClose">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <div class="modal-left">
+                <div class="globe-wrap">
+                    <div class="orbit"></div>
+                    <div class="globe"></div>
+                </div>
+                <div class="globe-label">
+                    GLOBAL POSITION · <b id="globeCoords">—</b>
+                </div>
+
+                <div class="map-section">
+                    <h3>◈ Live Map Feed</h3>
+                    <div class="map-frame" id="mapFrame"></div>
+                    <div class="map-actions">
+                        <a id="googleMapLink"  href="#" target="_blank" rel="noopener">🗺 GOOGLE MAPS</a>
+                        <a id="googleEarthLink" href="#" target="_blank" rel="noopener">🌍 GOOGLE EARTH</a>
+                        <a id="streetViewLink"  href="#" target="_blank" rel="noopener">📷 STREET VIEW</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-right">
+                <h3>◈ Full Record</h3>
+                <div class="data-grid" id="dataGrid"></div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <span>root@geo-intercept:~# <span class="blink">█</span></span>
+            <span>record <b id="footerId">—</b></span>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================== -->
+<!--  DASHBOARD                                     -->
+<!-- ============================================== -->
+<div class="container">
+
+    <!-- TOP STATUS BAR -->
+    <div class="top-bar">
+        <div class="left">
+            <span><span class="pulse-dot"></span>SYSTEM ONLINE</span>
+            <span>NODE: <b>GEO-01</b></span>
+            <span>ENCRYPTION: <b>AES-256</b></span>
+            <span>UPTIME: <b id="uptime">00:00:00</b></span>
+        </div>
+        <div class="right">
+            <span>CLOCK: <b id="clock">--:--:--</b></span>
+            <span>SESSION: <b id="sessionId">····</b></span>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header>
+        <h1>
+            ▓▒░ ADMIN://GEO-INTERCEPT
+            <span class="tag">v5.0</span>
+            <span>click any row → full profile + 3D globe + live map</span>
+        </h1>
+        <div class="actions">
+            <button class="btn" id="refreshBtn">↻ REFRESH</button>
+            <button class="btn active" id="soundBtn">🔊 SOUND: ON</button>
+            <button class="btn" id="testBtn">🧪 TEST ALERT</button>
+        </div>
+    </header>
+
+    <!-- HUD ROW -->
+    <div class="hud-row">
+        <!-- Radar -->
+        <div class="hud-cell">
+            <div class="hud-title">Signal Radar</div>
+            <div class="radar-wrap">
+                <div class="radar">
+                    <div class="radar-sweep"></div>
+                    <div class="radar-cross-h"></div>
+                    <div class="radar-cross-v"></div>
+                    <!-- blips injected by JS -->
+                </div>
+                <div class="radar-label" id="radarLabel">SCANNING · 0 TARGETS</div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="hud-cell">
+            <div class="hud-title">Telemetry</div>
+            <div class="mini-stats">
+                <div class="mini-stat">
+                    <div class="lbl">Total Records</div>
+                    <div class="val" id="statTotal">0</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="lbl">Unique IPs</div>
+                    <div class="val" id="statIPs">0</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="lbl">Last Capture</div>
+                    <div class="val small" id="statLast">—</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="lbl">Status</div>
+                    <div class="val small" id="statStatus">ARMED</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="lbl">Avg. Accuracy</div>
+                    <div class="val small" id="statAcc">—</div>
+                </div>
+                <div class="mini-stat">
+                    <div class="lbl">Captures / min</div>
+                    <div class="val small" id="statRate">0.0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hex stream -->
+        <div class="hud-cell">
+            <div class="hud-title">Live Data Stream</div>
+            <div class="hex-stream" id="hexStream"></div>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrap">
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>IP</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Accuracy</th>
+                        <th>Time</th>
+                        <th>Map</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="7">
+                        <div class="empty">
+                            <span class="big blink">▓▒░</span>
+                            Awaiting location signals...
+                        </div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- BOTTOM TERMINAL BAR -->
+<div class="terminal-bar">
+    <span>root@geo-intercept:~# <span class="blink">█</span></span>
+    <span>RECORDS: <b id="termCount">0</b></span>
+    <span>NET: <b>SECURE</b></span>
+    <span id="termStatus">READY</span>
+</div>
+
+<script>
+    // ============================================================
+    //  MATRIX RAIN BACKGROUND
+    // ============================================================
+    (function matrixRain() {
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        let cols, drops;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const fontSize = 14;
+            cols = Math.floor(canvas.width / fontSize);
+            drops = new Array(cols).fill(1).map(() => Math.random() * canvas.height);
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF';
+
+        function draw() {
+            ctx.fillStyle = 'rgba(2, 5, 2, 0.09)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = '14px monospace';
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                const x = i * 14;
+                const y = drops[i] * 14;
+                ctx.fillText(text, x, y);
+                if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(draw, 60);
+    })();
+
+    // ============================================================
+    //  CLOCK + UPTIME + SESSION ID
+    // ============================================================
+    const clockEl = document.getElementById('clock');
+    const uptimeEl = document.getElementById('uptime');
+    const sessionIdEl = document.getElementById('sessionId');
+    const startTime = Date.now();
+    const sessionId = Math.random().toString(36).slice(2, 10).toUpperCase();
+    sessionIdEl.textContent = sessionId;
+
+    setInterval(() => {
+        const now = new Date();
+        clockEl.textContent = now.toLocaleTimeString('en-GB');
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+        const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+        const s = String(elapsed % 60).padStart(2, '0');
+        uptimeEl.textContent = `${h}:${m}:${s}`;
+    }, 1000);
+
+    // ============================================================
+    //  HEX STREAM (live scrolling random hex)
+    // ============================================================
+    const hexStream = document.getElementById('hexStream');
+    function randomHexLine() {
+        const parts = [];
+        for (let i = 0; i < 6; i++) {
+            parts.push(Math.floor(Math.random() * 0xFFFF).toString(16).padStart(4, '0').toUpperCase());
+        }
+        const highlight = Math.random() < 0.15;
+        const line = parts.join(' ');
+        return highlight ? `<b>0x${line}</b>` : `0x${line}`;
+    }
+    setInterval(() => {
+        const line = document.createElement('div');
+        line.innerHTML = randomHexLine();
+        hexStream.appendChild(line);
+        while (hexStream.childNodes.length > 40) {
+            hexStream.removeChild(hexStream.firstChild);
+        }
+        hexStream.scrollTop = hexStream.scrollHeight;
+    }, 180);
+
+    // ============================================================
+    //  RADAR BLIPS
+    // ============================================================
+    const radarEl = document.querySelector('.radar');
+    const radarLabel = document.getElementById('radarLabel');
+    function spawnBlip() {
+        if (!radarEl) return;
+        const blip = document.createElement('div');
+        blip.className = 'radar-blip';
+        // random point inside circle
+        const angle = Math.random() * Math.PI * 2;
+        const radius = Math.random() * 40; // percent of half
+        const cx = 50 + Math.cos(angle) * radius;
+        const cy = 50 + Math.sin(angle) * radius;
+        blip.style.left = cx + '%';
+        blip.style.top  = cy + '%';
+        radarEl.appendChild(blip);
+        setTimeout(() => blip.remove(), 2200);
+    }
+    setInterval(spawnBlip, 700);
+    setInterval(() => {
+        const n = document.querySelectorAll('.radar-blip').length;
+        radarLabel.textContent = `SCANNING · ${n} TARGET${n === 1 ? '' : 'S'}`;
+    }, 400);
+
+    // ============================================================
+    //  AUDIO
+    // ============================================================
+    let audioCtx = null, soundEnabled = true, activeAlarm = null;
+
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    /* SHORT "LOCATION TRACKED" BEEP (~180 ms) */
+    function playTrackedBeep() {
+        if (!soundEnabled) return;
+        initAudio();
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime;
+        const dur = 0.18;
+
+        const master = audioCtx.createGain();
+        master.gain.setValueAtTime(0.0001, now);
+        master.gain.exponentialRampToValueAtTime(0.28, now + 0.008);
+        master.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+        master.connect(audioCtx.destination);
+
+        const osc1 = audioCtx.createOscillator();
+        osc1.type = 'square';
+        osc1.frequency.setValueAtTime(1400, now);
+        osc1.frequency.exponentialRampToValueAtTime(600, now + 0.06);
+        const g1 = audioCtx.createGain();
+        g1.gain.setValueAtTime(0.7, now);
+        g1.gain.setValueAtTime(0, now + 0.06);
+        osc1.connect(g1).connect(master);
+
+        const osc2 = audioCtx.createOscillator();
+        osc2.type = 'square';
+        osc2.frequency.setValueAtTime(500, now + 0.07);
+        osc2.frequency.exponentialRampToValueAtTime(1800, now + 0.13);
+        const g2 = audioCtx.createGain();
+        g2.gain.setValueAtTime(0, now);
+        g2.gain.setValueAtTime(0, now + 0.07);
+        g2.gain.setValueAtTime(0.7, now + 0.075);
+        g2.gain.setValueAtTime(0, now + 0.13);
+        osc2.connect(g2).connect(master);
+
+        const tickLen = Math.floor(audioCtx.sampleRate * 0.02);
+        const tickBuf = audioCtx.createBuffer(1, tickLen, audioCtx.sampleRate);
+        const tickData = tickBuf.getChannelData(0);
+        for (let i = 0; i < tickLen; i++) {
+            tickData[i] = (Math.random() * 2 - 1) * (1 - i / tickLen);
+        }
+        const tick = audioCtx.createBufferSource();
+        tick.buffer = tickBuf;
+        const tickGain = audioCtx.createGain();
+        tickGain.gain.value = 0.15;
+        tick.connect(tickGain).connect(master);
+
+        osc1.start(now);         osc1.stop(now + 0.08);
+        osc2.start(now + 0.07);  osc2.stop(now + 0.15);
+        tick.start(now);         tick.stop(now + 0.03);
+    }
+
+    function playBeep(freq = 1000, duration = 150, volume = 0.15) {
+        if (!soundEnabled) return;
+        initAudio(); if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(volume, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + duration / 1000);
+        g.connect(audioCtx.destination);
+        const o = audioCtx.createOscillator();
+        o.type = 'square'; o.frequency.value = freq;
+        o.connect(g); o.start(now); o.stop(now + duration / 1000);
+    }
+
+    function speakAlert() {
+        if (!soundEnabled || !('speechSynthesis' in window)) return;
+        try {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance('New location tracked');
+            u.rate = 1.1; u.pitch = 0.9; u.volume = 1; u.lang = 'en-US';
+            window.speechSynthesis.speak(u);
+        } catch(e){}
+    }
+
+    // ============================================================
+    //  NEW-LOCATION ALERT
+    // ============================================================
+    const alertOverlay = document.getElementById('alertOverlay');
+    const alertLat = document.getElementById('alertLat');
+    const alertLng = document.getElementById('alertLng');
+    const alertIp  = document.getElementById('alertIp');
+    const alertTime = document.getElementById('alertTime');
+    const alertClose = document.getElementById('alertClose');
+    const termStatus = document.getElementById('termStatus');
+    let alertTimer = null;
+
+    function showAlert(record) {
+        alertLat.textContent  = record.lat ?? '—';
+        alertLng.textContent  = record.lng ?? '—';
+        alertIp.textContent   = record.ip  ?? '—';
+        const d = new Date(record.timestamp || record.receivedAt);
+        alertTime.textContent = isNaN(d) ? '—' : d.toLocaleTimeString();
+        alertOverlay.classList.remove('show');
+        void alertOverlay.offsetWidth;
+        alertOverlay.classList.add('show');
+        if (alertTimer) clearTimeout(alertTimer);
+        alertTimer = setTimeout(hideAlert, 6000);
+        termStatus.textContent = '⚠ NEW TARGET';
+        termStatus.style.color = '#ff5a5a';
+    }
+    function hideAlert() {
+        alertOverlay.classList.remove('show');
+        if (alertTimer) { clearTimeout(alertTimer); alertTimer = null; }
+        if (activeAlarm) { activeAlarm.stop(); activeAlarm = null; }
+        if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        termStatus.textContent = 'READY';
+        termStatus.style.color = '#0a0';
+    }
+    alertClose.addEventListener('click', hideAlert);
+    alertOverlay.addEventListener('click', e => { if (e.target === alertOverlay) hideAlert(); });
+
+    // ============================================================
+    //  USER DETAIL POPUP
+    // ============================================================
+    const userModal      = document.getElementById('userModal');
+    const userModalClose = document.getElementById('userModalClose');
+    const dataGrid       = document.getElementById('dataGrid');
+    const mapFrame       = document.getElementById('mapFrame');
+    const googleMapLink  = document.getElementById('googleMapLink');
+    const googleEarthLink = document.getElementById('googleEarthLink');
+    const streetViewLink = document.getElementById('streetViewLink');
+    const globeCoords    = document.getElementById('globeCoords');
+    const footerId       = document.getElementById('footerId');
+
+    function escapeHtml(str) {
+        return String(str ?? '').replace(/[&<>"']/g, c => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[c]));
+    }
+
+    function copyToClipboard(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = '✓ COPIED';
+            btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1200);
+        }).catch(() => {});
+    }
+
+    function buildDataGrid(record) {
+        const rows = [
+            { key: 'Record ID',   val: record.id || '—',          cls: 'id mono' },
+            { key: 'IP Address',  val: record.ip || '—',          cls: 'ip' },
+            { key: 'Latitude',    val: record.lat ?? '—',         cls: 'coord' },
+            { key: 'Longitude',   val: record.lng ?? '—',         cls: 'coord' },
+            { key: 'Accuracy',    val: record.accuracy ? `±${Number(record.accuracy).toFixed(2)} m` : 'N/A', cls: '' },
+            { key: 'Screen',      val: record.screen || '—',      cls: 'mono' },
+            { key: 'Timestamp',   val: (() => {
+                const d = new Date(record.timestamp);
+                return isNaN(d) ? '—' : d.toLocaleString();
+            })(), cls: '' },
+            { key: 'Received At', val: record.receivedAt || '—',  cls: 'mono' },
+            { key: 'User Agent',  val: record.userAgent || '—',   cls: 'mono' }
+        ];
+
+        dataGrid.innerHTML = rows.map(r => `
+            <div class="data-row">
+                <div class="data-key">${escapeHtml(r.key)}</div>
+                <div class="data-val ${r.cls}">
+                    ${escapeHtml(r.val)}
+                    <button class="copy-btn" data-copy="${escapeHtml(r.val)}">COPY</button>
+                </div>
+            </div>
+        `).join('');
+
+        dataGrid.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                copyToClipboard(btn.dataset.copy, btn);
+            });
+        });
+    }
+
+    function openUserModal(record) {
+        console.log('Opening user modal for:', record);
+
+        const lat = Number(record.lat), lng = Number(record.lng);
+        if (isNaN(lat) || isNaN(lng)) {
+            console.warn('Invalid coords', record);
+            alert('This record has no valid coordinates.');
+            return;
+        }
+
+        buildDataGrid(record);
+        globeCoords.textContent = `${lat.toFixed(4)}°, ${lng.toFixed(4)}°`;
+        footerId.textContent = record.id || '—';
+
+        const d = 0.01;
+        const bbox = `${lng - d},${lat - d},${lng + d},${lat + d}`;
+        mapFrame.innerHTML = `
+            <iframe
+                src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lng}"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+
+        googleMapLink.href    = `https://www.google.com/maps?q=${lat},${lng}`;
+        googleEarthLink.href  = `https://earth.google.com/web/@${lat},${lng},0a,1000d,35y,0h,0t,0r`;
+        streetViewLink.href   = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lng}`;
+
+        userModal.classList.add('show');
+    }
+
+    function closeUserModal() {
+        userModal.classList.remove('show');
+        setTimeout(() => { mapFrame.innerHTML = ''; }, 250);
+    }
+
+    userModalClose.addEventListener('click', closeUserModal);
+    userModal.addEventListener('click', e => { if (e.target === userModal) closeUserModal(); });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            if (userModal.classList.contains('show')) closeUserModal();
+            else hideAlert();
+        }
+    });
+
+    // ============================================================
+    //  TABLE + STATS
+    // ============================================================
+    const tbody = document.getElementById('tableBody');
+    const statTotal  = document.getElementById('statTotal');
+    const statIPs    = document.getElementById('statIPs');
+    const statLast   = document.getElementById('statLast');
+    const statStatus = document.getElementById('statStatus');
+    const statAcc    = document.getElementById('statAcc');
+    const statRate   = document.getElementById('statRate');
+    const termCount  = document.getElementById('termCount');
+
+    const knownIds = new Set();
+    let firstLoadDone = false;
+    let allRecords = [];
+    const captureTimes = [];
+
+    function renderRows(records, newIds) {
+        if (!records || records.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7">
+                <div class="empty">
+                    <span class="big blink">▓▒░</span>
+                    Awaiting location signals...
+                </div>
+            </td></tr>`;
+            return;
+        }
+        const sorted = [...records].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        tbody.innerHTML = sorted.map((r, i) => {
+            const isNew = newIds.has(r.id);
+            const d = new Date(r.timestamp || r.receivedAt);
+            const time = isNaN(d) ? '—' : d.toLocaleString();
+            const mapUrl = `https://www.google.com/maps?q=${r.lat},${r.lng}`;
+            const acc = r.accuracy ? `±${Number(r.accuracy).toFixed(1)} m` : 'N/A';
+            return `<tr class="${isNew ? 'new-row' : ''}" data-id="${escapeHtml(r.id)}">
+                <td>${sorted.length - i}</td>
+                <td class="ip">${escapeHtml(r.ip)}</td>
+                <td class="lat">${escapeHtml(r.lat)}</td>
+                <td class="lng">${escapeHtml(r.lng)}</td>
+                <td>${escapeHtml(acc)}</td>
+                <td class="time">${escapeHtml(time)}</td>
+                <td><a class="map-link" href="${escapeHtml(mapUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🗺 OPEN</a></td>
+            </tr>`;
+        }).join('');
+
+        tbody.querySelectorAll('tr[data-id]').forEach(tr => {
+            tr.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') return;
+                const id = tr.getAttribute('data-id');
+                const rec = allRecords.find(r => String(r.id) === String(id));
+                if (rec) openUserModal(rec);
+                else console.warn('Record not found for id:', id);
+            });
+        });
+    }
+
+    function updateStats(records) {
+        statTotal.textContent = records.length;
+        termCount.textContent = records.length;
+
+        const uniqueIPs = new Set(records.map(r => r.ip)).size;
+        statIPs.textContent = uniqueIPs;
+
+        if (records.length > 0) {
+            const latest = records.reduce((a, b) =>
+                (a.timestamp || 0) > (b.timestamp || 0) ? a : b);
+            const d = new Date(latest.timestamp || latest.receivedAt);
+            statLast.textContent = isNaN(d) ? '—' : d.toLocaleTimeString();
+
+            const accs = records.map(r => Number(r.accuracy)).filter(n => !isNaN(n) && n > 0);
+            if (accs.length) {
+                const avg = accs.reduce((a,b) => a+b, 0) / accs.length;
+                statAcc.textContent = `±${avg.toFixed(1)} m`;
+            } else statAcc.textContent = '—';
+        } else {
+            statLast.textContent = '—';
+            statAcc.textContent = '—';
+        }
+
+        // captures/min
+        const now = Date.now();
+        captureTimes.push(now);
+        while (captureTimes.length && captureTimes[0] < now - 60000) captureTimes.shift();
+        statRate.textContent = captureTimes.length.toFixed(1);
+    }
+
+    // ============================================================
+    //  LOAD + POLL
+    // ============================================================
+    async function loadLocations() {
+        try {
+            const res = await fetch('/api/locations');
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            allRecords = data;
+
+            const newRecords = data.filter(r => !knownIds.has(r.id));
+            const newIds = new Set(newRecords.map(r => r.id));
+
+            renderRows(data, newIds);
+            updateStats(data);
+
+            if (firstLoadDone && newRecords.length > 0) {
+                const latestNew = newRecords.reduce((a, b) =>
+                    (a.timestamp || 0) > (b.timestamp || 0) ? a : b);
+                showAlert(latestNew);
+                playTrackedBeep();
+                speakAlert();
+                flashTitle();
+            }
+
+            data.forEach(r => knownIds.add(r.id));
+            firstLoadDone = true;
+        } catch (err) {
+            console.error('Load failed:', err);
+        }
+    }
+
+    const originalTitle = document.title;
+    let titleTimer = null;
+    function flashTitle() {
+        if (titleTimer) return;
+        let on = false;
+        titleTimer = setInterval(() => {
+            document.title = on ? '⚠ NEW LOCATION ⚠' : originalTitle;
+            on = !on;
+        }, 550);
+        setTimeout(() => {
+            clearInterval(titleTimer);
+            titleTimer = null;
+            document.title = originalTitle;
+        }, 6000);
+    }
+
+    // ============================================================
+    //  BUTTONS
+    // ============================================================
+    document.getElementById('refreshBtn').addEventListener('click', loadLocations);
+
+    const soundBtn = document.getElementById('soundBtn');
+    soundBtn.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        soundBtn.textContent = soundEnabled ? '🔊 SOUND: ON' : '🔇 SOUND: OFF';
+        soundBtn.classList.toggle('active', soundEnabled);
+        statStatus.textContent = soundEnabled ? 'ARMED' : 'MUTED';
+        if (soundEnabled) playBeep(1000, 150);
+        else {
+            if (activeAlarm) { activeAlarm.stop(); activeAlarm = null; }
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        }
+    });
+
+    document.getElementById('testBtn').addEventListener('click', () => {
+        const fake = {
+            id: 'TEST-' + Date.now(),
+            ip: '127.0.0.1',
+            lat: 28.6139391,
+            lng: 77.2090212,
+            accuracy: 12.3,
+            screen: '1920x1080',
+            userAgent: navigator.userAgent,
+            timestamp: Date.now(),
+            receivedAt: new Date().toISOString()
+        };
+        showAlert(fake);
+        playTrackedBeep();
+        speakAlert();
+        flashTitle();
+    });
+
+    // ============================================================
+    //  AUTO-REFRESH
+    // ============================================================
+    let refreshInterval = null;
+    function startAutoRefresh() {
+        if (refreshInterval) clearInterval(refreshInterval);
+        refreshInterval = setInterval(loadLocations, 3000);
+    }
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            if (refreshInterval) { clearInterval(refreshInterval); refreshInterval = null; }
+            statStatus.textContent = soundEnabled ? 'PAUSED' : 'MUTED';
+        } else {
+            startAutoRefresh();
+            statStatus.textContent = soundEnabled ? 'ARMED' : 'MUTED';
+            loadLocations();
+        }
+    });
+
+    loadLocations();
+    startAutoRefresh();
+</script>
+</body>
+</html>

